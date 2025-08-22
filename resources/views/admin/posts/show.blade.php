@@ -1,14 +1,57 @@
-
 @extends('layouts.admin')
 
 @section('title', 'Detail Post')
 
+@section('styles')
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+<style>
+    .content-html {
+        max-width: 100%;
+        color: #4a5568;
+        line-height: 1.7;
+        font-family: sans-serif;
+    }
+    .content-html img {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin: 1rem auto;
+        display: block;
+    }
+    .gallery-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    .gallery-image:hover { transform: scale(1.05); }
+    .download-btn {
+        display: inline-block;
+        background-color: #3b82f6;
+        color: #fff;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background 0.3s;
+    }
+    .download-btn:hover { background-color: #2563eb; }
+</style>
+@endsection
+
 @section('content')
-<div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow">
-    <h2 class="text-2xl font-bold mb-4">{{ $post->title }}</h2>
-    <p><strong>Jurusan:</strong> {{ $post->jurusan->name }}</p>
-    @if ($post->image)
-        <img src="{{ Storage::url($post->image) }}" alt="{{ $post->title }}" class="w-full max-w-md object-cover mb-4 rounded">
+<div class="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow my-8">
+
+    <h1 class="text-3xl font-bold mb-4">{{ $post->title }}</h1>
+    <p class="mb-4"><strong>Jurusan:</strong> {{ $post->jurusan->name }}</p>
+
+    @if($post->image)
+        <img src="{{ Storage::url($post->image) }}" alt="{{ $post->title }}" class="w-full max-w-2xl object-cover mb-6 rounded mx-auto">
     @endif
 
     @php
@@ -25,17 +68,45 @@
         ];
     @endphp
 
-    @foreach ($sections as $key => $label)
-        @if ($post->$key || $post->{$key . '_photos'})
-            <div class="mb-4">
-                <h3 class="font-semibold text-lg">{{ $label }}</h3>
-                @if ($post->$key)
-                    <div class="prose max-w-none">{!! $post->$key !!}</div>
+    @foreach($sections as $key => $label)
+        @php
+            $content = $post->$key;
+            $photos = json_decode($post->{$key . '_photos'}, true);
+            $files = json_decode($post->{$key . '_files'}, true);
+        @endphp
+
+        @if(!empty($content) || !empty($photos) || !empty($files))
+            <div class="mb-8">
+                <h2 class="font-semibold text-lg text-gray-800 mb-2">{{ $label }}</h2>
+
+                {{-- Konten HTML --}}
+                @if(!empty($content))
+                    <div class="content-html">{!! $content !!}</div>
                 @endif
-                @if ($post->{$key . '_photos'})
-                    <div class="gallery mb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 justify-center">
-                        @foreach (json_decode($post->{$key . '_photos'}, true) as $photo)
-                            <img src="{{ Storage::url($photo) }}" alt="{{ $label }}" class="gallery-image rounded-lg shadow">
+
+                {{-- Galeri Foto --}}
+                @if(!empty($photos) && is_array($photos))
+                    <div class="grid mt-4 gap-4
+                        @if(count($photos) > 4) grid-cols-4
+                        @elseif(count($photos) === 2) grid-cols-2
+                        @elseif(count($photos) === 3) grid-cols-3
+                        @else grid-cols-1 @endif">
+                        @foreach($photos as $photo)
+                            <img src="{{ Storage::url($photo) }}" alt="{{ $label }} Foto" class="gallery-image">
+                        @endforeach
+                    </div>
+                @endif
+
+                {{-- Files --}}
+                @if(!empty($files) && is_array($files))
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        @foreach($files as $file)
+                            @php
+                                $filePath = is_array($file) && isset($file['path']) ? $file['path'] : $file;
+                            @endphp
+                            <a href="{{ Storage::url($filePath) }}" class="download-btn" download>
+                                Download {{ pathinfo($filePath, PATHINFO_BASENAME) }}
+                            </a>
                         @endforeach
                     </div>
                 @endif
@@ -45,99 +116,7 @@
 
     <div class="mt-6">
         <a href="{{ route('admin.posts.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Kembali</a>
-        <a href="{{ route('admin.posts.edit', $post) }}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Edit</a>
-        <button onclick="confirmDelete({{ $post->id }})" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Hapus</button>
     </div>
+
 </div>
 @endsection
-
-@section('styles')
-<style>
-    .prose img {
-        max-width: 100%;
-        width: calc(100% - 2rem);
-        height: auto;
-        margin: 10px 1rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 4px;
-        display: block;
-    }
-    .prose .ql-align-center img {
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .prose .ql-align-left img {
-        float: left;
-        margin-right: 1rem;
-        margin-left: 1rem;
-    }
-    .prose .ql-align-right img {
-        float: right;
-        margin-left: 1rem;
-        margin-right: 1rem;
-    }
-    .prose::after {
-        content: '';
-        display: table;
-        clear: both;
-    }
-    .gallery {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 10px;
-        margin: 10px 0;
-        justify-content: center;
-    }
-    .gallery-image {
-        width: 100%;
-        height: 150px;
-        object-fit: cover;
-        border: 1px solid #e5e7eb;
-        border-radius: 4px;
-    }
-    @media (max-width: 768px) {
-        .gallery {
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        }
-        .gallery-image {
-            height: 120px;
-        }
-    }
-    @media (max-width: 480px) {
-        .gallery {
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-        }
-        .gallery-image {
-            height: 100px;
-        }
-    }
-</style>
-@endsection
-
-@section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    function confirmDelete(id) {
-        Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Anda tidak akan dapat mengembalikan ini!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '{{ route('admin.posts.destroy', '__ID__') }}'.replace('__ID__', id);
-                form.innerHTML = '@csrf @method("DELETE")';
-                document.body.appendChild(form);
-                form.submit();
-            }
-        });
-    }
-</script>
-@endsection
-

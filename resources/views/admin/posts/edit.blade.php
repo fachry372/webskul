@@ -63,6 +63,10 @@
         @endphp
 
         @foreach ($sections as $key => $label)
+            @php
+                $photos = json_decode($post->{$key . '_photos'} ?? '[]', true);
+                $files  = json_decode($post->{$key . '_files'} ?? '[]', true);
+            @endphp
             <div class="mb-4 card border rounded">
                 <div class="card-header bg-gray-100 p-3 flex justify-between items-center cursor-pointer" onclick="toggleCard('{{ $key }}')">
                     <h3 class="font-semibold">{{ $label }}</h3>
@@ -71,6 +75,7 @@
                     </svg>
                 </div>
                 <div id="content-{{ $key }}" class="card-content p-3" style="display: none;">
+                    {{-- Quill Editor --}}
                     <div class="mb-4">
                         <label class="block font-semibold mb-2">Konten {{ $label }}</label>
                         <div id="editor-{{ $key }}" class="ql-editor">{!! old($key, $post->$key) !!}</div>
@@ -80,27 +85,35 @@
                         @enderror
                     </div>
 
-                    {{-- Upload foto tambahan --}}
+                    {{-- Foto --}}
                     <div class="mt-4">
                         <label for="{{ $key }}_photos" class="block font-semibold">Foto {{ $label }} (Opsional)</label>
-                        <input type="file" name="{{ $key }}_photos[]" id="{{ $key }}_photos" multiple accept="image/*" class="w-full border rounded p-2 @error($key . '_photos') border-red-500 @enderror">
-                        @error($key . '_photos')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-
-                        <input type="hidden" name="{{ $key }}_photos_json" id="{{ $key }}_photos_json" value="{{ $post->{$key . '_photos'} }}">
-
+                        <input type="file" name="{{ $key }}_photos[]" id="{{ $key }}_photos" multiple accept="image/*" class="w-full border rounded p-2">
+                        <input type="hidden" name="{{ $key }}_photos_json" id="{{ $key }}_photos_json" value="{{ json_encode($photos) }}">
                         <div id="preview-{{ $key }}" class="gallery mt-2 flex flex-wrap gap-2">
-                            @if ($post->{$key . '_photos'})
-                                @foreach (json_decode($post->{$key . '_photos'}, true) as $index => $photo)
-                                    @if ($photo)
-                                        <div class="relative group">
-                                            <img src="{{ Storage::url($photo) }}" alt="Photo {{ $index + 1 }}" class="w-24 h-24 object-cover border rounded">
-                                            <button type="button" class="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" onclick="removeImage('{{ $key }}', '{{ $photo }}', this)">
-                                                &times;
-                                            </button>
-                                        </div>
-                                    @endif
+                            @if($photos)
+                                @foreach($photos as $photo)
+                                    <div class="img-wrapper">
+                                        <img src="{{ Storage::url($photo) }}" class="w-24 h-24 object-cover border rounded">
+                                        <span onclick="removeImage('{{ $key }}', '{{ $photo }}', this)">✖</span>
+                                    </div>
+                                @endforeach
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- File --}}
+                    <div class="mt-4">
+                        <label for="{{ $key }}_files" class="block font-semibold">File {{ $label }} (Opsional)</label>
+                        <input type="file" name="{{ $key }}_files[]" id="{{ $key }}_files" multiple class="w-full border rounded p-2">
+                        <input type="hidden" name="{{ $key }}_files_json" id="{{ $key }}_files_json" value="{{ json_encode($files) }}">
+                        <div id="file-preview-{{ $key }}" class="mt-2 flex flex-col gap-2">
+                            @if($files)
+                                @foreach($files as $file)
+                                    <div class="flex items-center gap-2">
+                                        <a href="{{ Storage::url($file['path']) }}" target="_blank" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">{{ $file['filename'] ?? basename($file['path']) }}</a>
+                                        <button type="button" class="text-red-500 font-bold" onclick="removeFile('{{ $key }}', '{{ $file['path'] }}', this)">✖</button>
+                                    </div>
                                 @endforeach
                             @endif
                         </div>
@@ -122,169 +135,149 @@
 <style>
     .card-header:hover { background-color: #e5e7eb; }
     .card-header svg.rotate { transform: rotate(180deg); }
-    .ql-editor {
-        min-height: 200px;
-        background: #fff;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-    .ql-editor img {
-        max-width: 100%;
-        height: auto;
-        margin: 10px 0;
-    }
-    .ql-container {
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-    .ql-toolbar {
-        border: 1px solid #ccc;
-        border-bottom: none;
-        border-radius: 4px 4px 0 0;
-    }
-    .gallery img {
-        width: 100px;
-        height: 100px;
-        object-fit: cover;
-        border: 1px solid #e5e7eb;
-        border-radius: 4px;
-    }
+    .ql-editor { min-height: 200px; background: #fff; border: 1px solid #ccc; border-radius: 4px; }
+    .ql-editor img { max-width: 100%; height: auto; margin: 10px 0; }
+    .ql-container { border: 1px solid #ccc; border-radius: 4px; }
+    .ql-toolbar { border: 1px solid #ccc; border-bottom: none; border-radius: 4px 4px 0 0; }
+    .gallery { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+    .gallery img { width: 100px; height: 100px; object-fit: cover; border: 1px solid #e5e7eb; border-radius: 4px; }
+    .img-wrapper { position: relative; display: inline-block; }
+    .img-wrapper span { position: absolute; top: -6px; right: -6px; background: #dc2626; color: white; font-size: 16px; border-radius: 50%; width: 24px; height: 24px; line-height: 22px; text-align: center; cursor: pointer; font-weight: bold; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    .img-wrapper span:hover { background: #b91c1c; }
 </style>
 @endsection
 
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
-    function toggleCard(id) {
-        const content = document.getElementById(`content-${id}`);
-        const arrow = document.getElementById(`arrow-${id}`);
-        if (content && arrow) {
-            content.style.display = content.style.display === 'none' ? 'block' : 'none';
-            arrow.classList.toggle('rotate');
+function toggleCard(id) {
+    const content = document.getElementById(`content-${id}`);
+    const arrow = document.getElementById(`arrow-${id}`);
+    if (content && arrow) {
+        content.style.display = content.style.display === 'none' ? 'block' : 'none';
+        arrow.classList.toggle('rotate');
+    }
+}
+
+function removeImage(sectionKey, photoPath, buttonElement) {
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Gambar ini akan dihapus dari post!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const jsonInput = document.getElementById(`${sectionKey}_photos_json`);
+            let photos = JSON.parse(jsonInput.value || '[]');
+            photos = photos.filter(p => p !== photoPath);
+            jsonInput.value = JSON.stringify(photos);
+            buttonElement.parentElement.remove();
+            Swal.fire('Terhapus!', 'Gambar berhasil dihapus.', 'success');
         }
-    }
+    });
+}
 
-    function removeImage(sectionKey, photoPath, buttonElement) {
-        Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: "Gambar ini akan dihapus dari post!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const jsonInput = document.getElementById(`${sectionKey}_photos_json`);
-                let photos = JSON.parse(jsonInput.value || '[]');
-                photos = photos.filter(p => p !== photoPath);
-                jsonInput.value = JSON.stringify(photos);
-                buttonElement.parentElement.remove();
-                Swal.fire('Terhapus!', 'Gambar berhasil dihapus.', 'success');
-            }
-        });
-    }
+function removeFile(sectionKey, filePath, buttonElement) {
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "File ini akan dihapus dari post!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const jsonInput = document.getElementById(`${sectionKey}_files_json`);
+            let files = JSON.parse(jsonInput.value || '[]');
+            files = files.filter(f => f.path !== filePath);
+            jsonInput.value = JSON.stringify(files);
+            buttonElement.parentElement.remove();
+            Swal.fire('Terhapus!', 'File berhasil dihapus.', 'success');
+        }
+    });
+}
 
-    document.addEventListener('DOMContentLoaded', () => {
-        // Inisialisasi semua editor Quill
-        @foreach ($sections as $key => $label)
-            (function() {
-                const editorElement = document.getElementById(`editor-{{ $key }}`);
-                const textareaElement = document.getElementById(`{{ $key }}`);
-
-                if (!editorElement || !textareaElement) {
-                    console.error('Editor or textarea not found for: {{ $key }}');
-                    return;
-                }
-
-                const quill = new Quill(editorElement, {
-                    theme: 'snow',
-                    modules: {
-                        toolbar: [
-                            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                            ['bold', 'italic', 'underline', 'strike'],
-                            [{ 'color': [] }, { 'background': [] }],
-                            [{ 'font': [] }],
-                            [{ 'align': [] }],
-                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                            ['link', 'image', 'code-block'],
-                            ['clean']
-                        ]
-                    },
-                    placeholder: 'Tulis {{ $label }} di sini...'
-                });
-
-                // Isi awal dari textarea
-                if (textareaElement.value) {
-                    quill.root.innerHTML = textareaElement.value;
-                }
-
-                // ✅ PERBAIKAN: Hapus baris konversi ke style inline
-                // Update textarea setiap ada perubahan
-                quill.on('text-change', () => {
-                    textareaElement.value = quill.root.innerHTML;
-                });
-
-                // Handler upload gambar
-                quill.getModule('toolbar').addHandler('image', () => {
-                    const input = document.createElement('input');
-                    input.setAttribute('type', 'file');
-                    input.setAttribute('accept', 'image/*');
-                    input.click();
-
-                    input.onchange = async () => {
-                        const file = input.files[0];
-                        if (file) {
-                            const formData = new FormData();
-                            formData.append('image', file);
-                            formData.append('_token', '{{ csrf_token() }}');
-
-                            try {
-                                const response = await fetch('{{ route("admin.posts.upload") }}', {
-                                    method: 'POST',
-                                    body: formData
-                                });
-                                const result = await response.json();
-                                if (result.success) {
-                                    const range = quill.getSelection();
-                                    quill.insertEmbed(range.index, 'image', result.url);
-                                } else {
-                                    Swal.fire('Gagal!', result.error || 'Gagal mengunggah gambar', 'error');
-                                }
-                            } catch (error) {
-                                Swal.fire('Error!', 'Terjadi kesalahan: ' + error.message, 'error');
-                            }
-                        }
-                    };
-                });
-            })();
-        @endforeach
+document.addEventListener('DOMContentLoaded', () => {
+    const sections = @json(array_keys($sections));
+    sections.forEach(key => {
+        const editorEl = document.getElementById(`editor-${key}`);
+        const textareaEl = document.getElementById(key);
+        const quill = new Quill(editorEl, { theme: 'snow', modules: { toolbar: [
+            [{ 'header': [1,2,3,4,5,6,false] }],
+            ['bold','italic','underline','strike'],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'font': [] }],
+            [{ 'align': [] }],
+            [{ 'list': 'ordered' }, { 'list':'bullet' }],
+            ['link','image','code-block'],
+            ['clean']
+        ]}});
+        quill.on('text-change', () => textareaEl.value = quill.root.innerHTML);
 
         // Preview foto baru
-        @foreach (array_keys($sections) as $key)
-            const input{{ $key }} = document.getElementById('{{ $key }}_photos');
-            if (input{{ $key }}) {
-                input{{ $key }}.addEventListener('change', function(e) {
-                    const files = e.target.files;
-                    const preview = document.getElementById('preview-{{ $key }}');
-                    if (files.length > 0) {
-                        for (let i = 0; i < files.length; i++) {
-                            const reader = new FileReader();
-                            reader.onload = function(e) {
-                                const img = document.createElement('img');
-                                img.src = e.target.result;
-                                img.className = 'w-24 h-24 object-cover border rounded';
-                                preview.appendChild(img);
-                            }
-                            reader.readAsDataURL(files[i]);
-                        }
-                    }
+        const inputPhoto = document.getElementById(`${key}_photos`);
+        if(inputPhoto){
+            let dt = new DataTransfer();
+            inputPhoto.addEventListener('change', e => {
+                const files = Array.from(e.target.files);
+                const preview = document.getElementById(`preview-${key}`);
+                files.forEach(file => {
+                    dt.items.add(file);
+                    const reader = new FileReader();
+                    reader.onload = ev => {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'img-wrapper';
+                        const img = document.createElement('img');
+                        img.src = ev.target.result;
+                        img.className = 'w-24 h-24 object-cover border rounded';
+                        const btn = document.createElement('span');
+                        btn.innerHTML = '✖';
+                        btn.onclick = () => { wrapper.remove(); };
+                        wrapper.appendChild(img);
+                        wrapper.appendChild(btn);
+                        preview.appendChild(wrapper);
+                    };
+                    reader.readAsDataURL(file);
                 });
-            }
-        @endforeach
+                inputPhoto.files = dt.files;
+            });
+        }
+
+        // Preview file baru
+        const inputFile = document.getElementById(`${key}_files`);
+        if(inputFile){
+            let dtFile = new DataTransfer();
+            const previewFile = document.getElementById(`file-preview-${key}`);
+            inputFile.addEventListener('change', e => {
+                const files = Array.from(e.target.files);
+                files.forEach(file => {
+                    dtFile.items.add(file);
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center gap-2';
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(file);
+                    link.download = file.name;
+                    link.textContent = file.name;
+                    link.className = 'bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700';
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.textContent = '✖';
+                    btn.className = 'text-red-500 font-bold';
+                    btn.onclick = () => { div.remove(); };
+                    div.appendChild(link); div.appendChild(btn);
+                    previewFile.appendChild(div);
+                });
+                inputFile.files = dtFile.files;
+            });
+        }
     });
+});
 </script>
 @endsection

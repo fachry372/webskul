@@ -20,7 +20,7 @@
                     <td class="border p-2">{{ $post->title }}</td>
                     <td class="border p-2">{{ $post->jurusan->name }}</td>
                     <td class="border p-2">
-                        <a href="{{ route('admin.posts.show', $post) }}" class="text-blue-600 hover:underline">Lihat</a>
+                        {{-- <a href="{{ route('admin.posts.show', $post) }}" class="text-blue-600 hover:underline">Lihat</a> --}}
                         <a href="{{ route('admin.posts.edit', $post) }}" class="text-blue-600 hover:underline ml-2">Edit</a>
                         <form action="{{ route('admin.posts.destroy', $post) }}" method="POST" class="inline-block">
                             @csrf

@@ -18,6 +18,11 @@ class PostController extends Controller
         $posts = Post::with('jurusan')->latest()->get();
         return view('admin.posts.index', compact('posts'));
     }
+    public function show(Post $post)
+    {
+        return view('admin.posts.show', compact('post'));
+    }
+
 
     // Form create
     public function create()
@@ -35,12 +40,100 @@ class PostController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Cek jurusan sudah punya post
-        if (Post::where('jurusan_id', $request->jurusan_id)->exists()) {
-            return redirect()->back()
-                ->with('error', 'Jurusan ini sudah memiliki post.')
-                ->withInput();
+        $sections = [
+            'description', 'kompetensi_dasar', 'tujuan_pembelajaran',
+            'kurikulum_sinkronisasi', 'program_unggulan', 'tim_pengajar',
+            'galeri_kegiatan', 'kundudi', 'industri_pasangan'
+        ];
+
+        // HTMLPurifier config
+        $config = HTMLPurifier_Config::createDefault();
+        $config->set('HTML.Allowed',
+            'p[style|class],br,b,i,u,strong,em,s,strike,blockquote,code,pre,' .
+            'span[style|class],div[style|class],' .
+            'ul,ol,li,h1,h2,h3,h4,h5,h6,' .
+            'table,thead,tbody,tr,td,th,' .
+            'a[href|title|target],' .
+            'img[src|alt|width|height|style|class]'
+        );
+        $config->set('Attr.AllowedClasses', [
+            'ql-align-left','ql-align-center','ql-align-right','ql-align-justify',
+            'ql-font-serif','ql-font-monospace','ql-font-sans'
+        ]);
+        $config->set('CSS.AllowedProperties', [
+            'text-align','width','height',
+            'color','background-color','font-family','font-size','font-weight','font-style'
+        ]);
+        $purifier = new HTMLPurifier($config);
+
+        $data = [
+            'jurusan_id' => $request->jurusan_id,
+            'user_id' => auth()->id(),
+            'title' => $request->title,
+        ];
+
+        // Upload gambar utama
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+            $data['image'] = $image->storeAs('uploads', $filename, 'public');
         }
+
+        // Loop sections untuk text, photos, files
+        foreach ($sections as $section) {
+            // simpan teks
+            $data[$section] = $request->$section ? $purifier->purify($request->$section) : null;
+
+            // simpan photos
+            $photosKey = $section.'_photos';
+            if ($request->hasFile($photosKey)) {
+                $photos = [];
+                foreach ($request->file($photosKey) as $photo) {
+                    $filename = time() . '_' . Str::random(10) . '.' . $photo->getClientOriginalExtension();
+                    $path = $photo->storeAs('uploads', $filename, 'public');
+                    $photos[] = $path;
+                }
+                $data[$photosKey] = json_encode($photos);
+            }
+
+            // simpan files
+            $filesKey = $section.'_files';
+            if ($request->hasFile($filesKey)) {
+                $files = [];
+                foreach ($request->file($filesKey) as $file) {
+                    $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+                    $path = $file->storeAs('uploads', $filename, 'public');
+                    $files[] = [
+                        'filename' => $file->getClientOriginalName(),
+                        'path' => $path,
+                        'mime_type' => $file->getClientMimeType(),
+                        'size' => $file->getSize()
+                    ];
+                }
+                $data[$filesKey] = json_encode($files);
+            }
+        }
+
+        Post::create($data);
+
+        return redirect()->route('admin.posts.index')->with('success', 'Post berhasil dibuat.');
+    }
+
+
+    // Form edit
+    public function edit(Post $post)
+    {
+        $jurusan = Jurusan::all();
+        return view('admin.posts.edit', compact('post', 'jurusan'));
+    }
+
+    public function update(Request $request, Post $post)
+    {
+        $request->validate([
+            'jurusan_id' => 'required|exists:jurusans,id',
+            'title'      => 'required|string|max:255',
+            'image'      => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
         $sections = [
             'description', 'kompetensi_dasar', 'tujuan_pembelajaran',
@@ -58,137 +151,81 @@ class PostController extends Controller
             'a[href|title|target],' .
             'img[src|alt|width|height|style|class]'
         );
-
         $config->set('Attr.AllowedClasses', [
             'ql-align-left','ql-align-center','ql-align-right','ql-align-justify',
             'ql-font-serif','ql-font-monospace','ql-font-sans'
         ]);
-
         $config->set('CSS.AllowedProperties', [
             'text-align','width','height',
             'color','background-color','font-family','font-size','font-weight','font-style'
         ]);
-
         $purifier = new HTMLPurifier($config);
 
-        $data = [
-            'jurusan_id' => $request->jurusan_id,
-            'user_id' => auth()->id(),
-            'title' => $request->title,
-        ];
-
-        // Simpan semua section dengan purifier
-        foreach ($sections as $section) {
-            $data[$section] = $request->$section ? $purifier->purify($request->$section) : null;
-
-            // Upload foto section jika ada
-            $photosKey = $section . '_photos';
-            if ($request->hasFile($photosKey)) {
-                $photos = [];
-                foreach ($request->file($photosKey) as $photo) {
-                    $filename = time() . '_' . Str::random(10) . '.' . $photo->getClientOriginalExtension();
-                    $path = $photo->storeAs('uploads', $filename, 'public');
-                    $photos[] = $path;
-                }
-                $data[$photosKey] = json_encode($photos);
-            }
-        }
-
-        // Upload gambar utama
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-            $data['image'] = $image->storeAs('uploads', $filename, 'public');
-        }
-
-        Post::create($data);
-        return redirect()->route('admin.posts.index')->with('success', 'Post berhasil dibuat.');
-    }
-
-    // Form edit
-    public function edit(Post $post)
-    {
-        $jurusan = Jurusan::all();
-        return view('admin.posts.edit', compact('post', 'jurusan'));
-    }
-
-    // Update post
-    public function update(Request $request, Post $post)
-    {
-        $request->validate([
-            'jurusan_id' => 'required|exists:jurusans,id',
-            'title' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
-        $sections = [
-            'description', 'kompetensi_dasar', 'tujuan_pembelajaran',
-            'kurikulum_sinkronisasi', 'program_unggulan', 'tim_pengajar',
-            'galeri_kegiatan', 'kundudi', 'industri_pasangan'
-        ];
-
-        $config = HTMLPurifier_Config::createDefault();
-        $config->set('HTML.Allowed',
-            'p[style|class],br,b,i,u,strong,em,s,strike,blockquote,code,pre,' .
-            'span[style|class],div[style|class],' .
-            'ul,ol,li,h1,h2,h3,h4,h5,h6,' .
-            'table,thead,tbody,tr,td,th,' .
-            'a[href|title|target],' .
-            'img[src|alt|width|height|style|class]'
-        );
-
-        $config->set('Attr.AllowedClasses', [
-            'ql-align-left','ql-align-center','ql-align-right','ql-align-justify',
-            'ql-font-serif','ql-font-monospace','ql-font-sans'
-        ]);
-
-        $config->set('CSS.AllowedProperties', [
-            'text-align','width','height',
-            'color','background-color','font-family','font-size','font-weight','font-style'
-        ]);
-
-        $purifier = new HTMLPurifier($config);
-
+        // Update data dasar
         $post->jurusan_id = $request->jurusan_id;
-        $post->title = $request->title;
+        $post->title      = $request->title;
 
         foreach ($sections as $section) {
-            if ($request->has($section)) {
-                $post->$section = $purifier->purify($request->$section);
-            }
+            // Simpan konten teks
+            $post->$section = $request->$section ? $purifier->purify($request->$section) : null;
 
-            // Upload foto section
-            $photosKey = $section . '_photos';
+            // =========================
+            // Handle photos
+            // =========================
+            $photosKey = $section.'_photos';
+            $existingPhotos = json_decode($request->input($photosKey.'_json', '[]'), true);
+            if (!is_array($existingPhotos)) $existingPhotos = [];
+
             if ($request->hasFile($photosKey)) {
-                if ($post->$photosKey) {
-                    foreach (json_decode($post->$photosKey, true) as $oldPhoto) {
-                        Storage::disk('public')->delete($oldPhoto);
-                    }
-                }
-
-                $uploadedPhotos = [];
                 foreach ($request->file($photosKey) as $photo) {
-                    $filename = time() . '_' . Str::random(10) . '.' . $photo->getClientOriginalExtension();
+                    $filename = time().'_'.Str::random(10).'.'.$photo->getClientOriginalExtension();
                     $path = $photo->storeAs('uploads', $filename, 'public');
-                    $uploadedPhotos[] = $path;
+                    $existingPhotos[] = $path;
                 }
-                $post->$photosKey = json_encode($uploadedPhotos);
             }
+            $post->$photosKey = !empty($existingPhotos) ? json_encode($existingPhotos) : null;
+
+            // =========================
+            // Handle files
+            // =========================
+            $filesKey = $section.'_files';
+            $existingFiles = json_decode($request->input($filesKey.'_json', '[]'), true);
+            if (!is_array($existingFiles)) $existingFiles = [];
+
+            if ($request->hasFile($filesKey)) {
+                foreach ($request->file($filesKey) as $file) {
+                    $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
+                    $path = $file->storeAs('uploads', $filename, 'public');
+                    $existingFiles[] = [
+                        'filename' => $file->getClientOriginalName(),
+                        'path' => $path,
+                        'mime_type' => $file->getClientMimeType(),
+                        'size' => $file->getSize()
+                    ];
+                }
+            }
+            $post->$filesKey = !empty($existingFiles) ? json_encode($existingFiles) : null;
         }
 
-        // Upload gambar utama
+        // =========================
+        // Gambar utama
+        // =========================
         if ($request->hasFile('image')) {
             if ($post->image) {
                 Storage::disk('public')->delete($post->image);
             }
             $image = $request->file('image');
-            $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+            $filename = time().'_'.Str::random(10).'.'.$image->getClientOriginalExtension();
             $post->image = $image->storeAs('uploads', $filename, 'public');
         }
 
         $post->save();
+
         return redirect()->route('admin.posts.index')->with('success', 'Post berhasil diperbarui.');
     }
+
+
+
 
     // Hapus post
     public function destroy(Post $post)
@@ -232,4 +269,64 @@ class PostController extends Controller
             return response()->json(['success' => false, 'error' => 'Server error: ' . $e->getMessage()], 500);
         }
     }
+
+    public function uploadFile(Request $request, $postId, $field)
+    {
+        // $field = nama kolom json, misal 'description_files', 'kompetensi_dasar_photos', dll
+        $validFields = [
+            'description_files', 'description_photos',
+            'kompetensi_dasar_files', 'kompetensi_dasar_photos',
+            'tujuan_pembelajaran_files', 'tujuan_pembelajaran_photos',
+            'kurikulum_sinkronisasi_files', 'kurikulum_sinkronisasi_photos',
+            'program_unggulan_files', 'program_unggulan_photos',
+            'tim_pengajar_files', 'tim_pengajar_photos',
+            'galeri_kegiatan_files', 'galeri_kegiatan_photos',
+            'kundudi_files', 'kundudi_photos',
+            'industri_pasangan_files', 'industri_pasangan_photos'
+        ];
+
+        if (!in_array($field, $validFields)) {
+            return response()->json(['success' => false, 'error' => 'Invalid field'], 400);
+        }
+
+        try {
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                if ($file->isValid()) {
+                    // Simpan file di storage
+                    $path = $file->store('public/editor-files');
+                    $url = Storage::url($path);
+
+                    // Ambil post dari DB
+                    $post = Post::findOrFail($postId);
+
+                    // Ambil data JSON lama, jika ada
+                    $currentFiles = $post->{$field} ? json_decode($post->{$field}, true) : [];
+
+                    // Tambahkan file baru
+                    $currentFiles[] = [
+                        'filename' => $file->getClientOriginalName(),
+                        'url' => $url,
+                        'mime_type' => $file->getClientMimeType(),
+                        'size' => $file->getSize()
+                    ];
+
+                    // Update kolom JSON
+                    $post->{$field} = json_encode($currentFiles);
+                    $post->save();
+
+                    return response()->json([
+                        'success' => true,
+                        'url' => $url,
+                        'file' => end($currentFiles)
+                    ], 200);
+                }
+                return response()->json(['success' => false, 'error' => 'Invalid file'], 400);
+            }
+            return response()->json(['success' => false, 'error' => 'No file uploaded'], 400);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => 'Server error: ' . $e->getMessage()], 500);
+        }
+
+}
 }
