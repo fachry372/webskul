@@ -222,14 +222,10 @@
                     quill.root.innerHTML = textareaElement.value;
                 }
 
+                // ✅ PERBAIKAN: Hapus baris konversi ke style inline
                 // Update textarea setiap ada perubahan
                 quill.on('text-change', () => {
-                    let html = quill.root.innerHTML;
-                    html = html.replace(/class="ql-align-center"/g, 'style="text-align:center;"');
-                    html = html.replace(/class="ql-align-right"/g, 'style="text-align:right;"');
-                    html = html.replace(/class="ql-align-justify"/g, 'style="text-align:justify;"');
-                    html = html.replace(/class="ql-align-left"/g, 'style="text-align:left;"');
-                    textareaElement.value = html;
+                    textareaElement.value = quill.root.innerHTML;
                 });
 
                 // Handler upload gambar

@@ -130,6 +130,22 @@
         border: 1px solid #e5e7eb;
         border-radius: 4px;
     }
+    /* tambahan untuk hapus foto */
+    .img-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+    .img-wrapper span {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        background: red;
+        color: white;
+        font-size: 12px;
+        border-radius: 50%;
+        padding: 2px 5px;
+        cursor: pointer;
+    }
 </style>
 @endsection
 
@@ -225,27 +241,43 @@
             }
         @endforeach
 
-        // Handle photo upload preview
+        // Handle photo upload preview + hapus gambar
         @foreach (array_keys($sections) as $key)
             const input{{ $key }} = document.getElementById('{{ $key }}_photos');
             if (input{{ $key }}) {
                 input{{ $key }}.addEventListener('change', function(e) {
-                    const files = e.target.files;
+                    let files = Array.from(e.target.files);
                     const preview = document.getElementById('preview-{{ $key }}');
                     preview.innerHTML = '';
 
-                    if (files.length > 0) {
-                        for (let i = 0; i < files.length; i++) {
-                            const reader = new FileReader();
-                            reader.onload = function(e) {
-                                const img = document.createElement('img');
-                                img.src = e.target.result;
-                                img.className = 'w-24 h-24 object-cover border rounded';
-                                preview.appendChild(img);
-                            }
-                            reader.readAsDataURL(files[i]);
-                        }
-                    }
+                    files.forEach((file, index) => {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const wrapper = document.createElement('div');
+                            wrapper.className = 'img-wrapper';
+
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.className = 'w-24 h-24 object-cover border rounded';
+
+                            const removeBtn = document.createElement('span');
+                            removeBtn.innerHTML = '✖';
+                            removeBtn.onclick = function() {
+                                wrapper.remove();
+                                files.splice(index, 1);
+
+                                // rebuild input files
+                                const dt = new DataTransfer();
+                                files.forEach(f => dt.items.add(f));
+                                input{{ $key }}.files = dt.files;
+                            };
+
+                            wrapper.appendChild(img);
+                            wrapper.appendChild(removeBtn);
+                            preview.appendChild(wrapper);
+                        };
+                        reader.readAsDataURL(file);
+                    });
                 });
             }
         @endforeach
