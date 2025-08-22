@@ -37,7 +37,8 @@
         <div class="mb-4">
             <label for="image" class="block font-semibold">Gambar Utama (Opsional)</label>
             @if ($post->image)
-                <div class="mb-2">
+                <div class="mb-2 relative">
+                    <span class="photo-order">1.</span>
                     <img src="{{ Storage::url($post->image) }}" alt="{{ $post->title }}" class="w-32 h-32 object-cover border rounded">
                 </div>
             @endif
@@ -47,7 +48,7 @@
             @enderror
         </div>
 
-        {{-- Section Editor --}}
+        {{-- Sections --}}
         @php
             $sections = [
                 'description' => 'Deskripsi',
@@ -78,7 +79,7 @@
                     {{-- Quill Editor --}}
                     <div class="mb-4">
                         <label class="block font-semibold mb-2">Konten {{ $label }}</label>
-                        <div id="editor-{{ $key }}" class="ql-editor">{!! old($key, $post->$key) !!}</div>
+                        <div id="editor-{{ $key }}" class="ql-editor"></div>
                         <textarea name="{{ $key }}" id="{{ $key }}" class="hidden">{{ old($key, $post->$key) }}</textarea>
                         @error($key)
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -92,13 +93,21 @@
                         <input type="hidden" name="{{ $key }}_photos_json" id="{{ $key }}_photos_json" value="{{ json_encode($photos) }}">
                         <div id="preview-{{ $key }}" class="gallery mt-2 flex flex-wrap gap-2">
                             @if($photos)
-                                @foreach($photos as $photo)
-                                    <div class="img-wrapper">
+                                @foreach($photos as $i => $photo)
+                                    <div class="img-wrapper relative">
+                                        <span class="photo-order">{{ $i+1 }}.</span>
                                         <img src="{{ Storage::url($photo) }}" class="w-24 h-24 object-cover border rounded">
                                         <span onclick="removeImage('{{ $key }}', '{{ $photo }}', this)">✖</span>
                                     </div>
                                 @endforeach
                             @endif
+                        </div>
+
+                        {{-- Teks di bawah foto --}}
+                        <div class="mt-2">
+                            <label class="block font-semibold mb-1">Teks Foto</label>
+                            <div id="editor-{{ $key }}_photos_text" class="ql-editor"></div>
+                            <textarea name="{{ $key }}_photos_text" id="{{ $key }}_photos_text" class="hidden">{{ old($key.'_photos_text', $post->{$key.'_photos_text'}) }}</textarea>
                         </div>
                     </div>
 
@@ -133,17 +142,34 @@
 @section('styles')
 <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
 <style>
-    .card-header:hover { background-color: #e5e7eb; }
-    .card-header svg.rotate { transform: rotate(180deg); }
-    .ql-editor { min-height: 200px; background: #fff; border: 1px solid #ccc; border-radius: 4px; }
-    .ql-editor img { max-width: 100%; height: auto; margin: 10px 0; }
-    .ql-container { border: 1px solid #ccc; border-radius: 4px; }
-    .ql-toolbar { border: 1px solid #ccc; border-bottom: none; border-radius: 4px 4px 0 0; }
-    .gallery { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
-    .gallery img { width: 100px; height: 100px; object-fit: cover; border: 1px solid #e5e7eb; border-radius: 4px; }
-    .img-wrapper { position: relative; display: inline-block; }
-    .img-wrapper span { position: absolute; top: -6px; right: -6px; background: #dc2626; color: white; font-size: 16px; border-radius: 50%; width: 24px; height: 24px; line-height: 22px; text-align: center; cursor: pointer; font-weight: bold; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
-    .img-wrapper span:hover { background: #b91c1c; }
+.card-header:hover { background-color: #e5e7eb; }
+.card-header svg.rotate { transform: rotate(180deg); }
+.ql-editor { min-height: 200px; background: #fff; border: 1px solid #ccc; border-radius: 4px; }
+.ql-editor img { max-width: 100%; height: auto; margin: 10px 0; }
+.ql-container { border: 1px solid #ccc; border-radius: 4px; }
+.ql-toolbar { border: 1px solid #ccc; border-bottom: none; border-radius: 4px 4px 0 0; }
+
+.gallery { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+.gallery img { width: 100px; height: 100px; object-fit: cover; border: 1px solid #e5e7eb; border-radius: 4px; }
+
+.img-wrapper { position: relative; display: inline-block; }
+.img-wrapper span { position: absolute; top: -6px; right: -6px; background: #dc2626; color: white; font-size: 16px; border-radius: 50%; width: 24px; height: 24px; line-height: 22px; text-align: center; cursor: pointer; font-weight: bold; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+.img-wrapper span:hover { background: #b91c1c; }
+
+.img-wrapper span.photo-order {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    background: rgba(0,0,0,0.4);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    width: auto;
+    height: auto;
+    line-height: normal;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
 </style>
 @endsection
 
@@ -151,16 +177,27 @@
 <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+const toolbarOptions = [
+    [{ 'header': [1,2,3,4,5,6,false] }],
+    ['bold','italic','underline','strike'],
+    [{ 'color': [] }, { 'background': [] }],
+    [{ 'font': [] }],
+    [{ 'align': [] }],
+    [{ 'list': 'ordered' }, { 'list':'bullet' }],
+    ['link','image','code-block'],
+    ['clean']
+];
+
 function toggleCard(id) {
     const content = document.getElementById(`content-${id}`);
     const arrow = document.getElementById(`arrow-${id}`);
-    if (content && arrow) {
+    if(content && arrow){
         content.style.display = content.style.display === 'none' ? 'block' : 'none';
         arrow.classList.toggle('rotate');
     }
 }
 
-function removeImage(sectionKey, photoPath, buttonElement) {
+function removeImage(sectionKey, photoPath, buttonElement){
     Swal.fire({
         title: 'Apakah Anda yakin?',
         text: "Gambar ini akan dihapus dari post!",
@@ -171,18 +208,20 @@ function removeImage(sectionKey, photoPath, buttonElement) {
         confirmButtonText: 'Ya, hapus!',
         cancelButtonText: 'Batal'
     }).then((result) => {
-        if (result.isConfirmed) {
+        if(result.isConfirmed){
             const jsonInput = document.getElementById(`${sectionKey}_photos_json`);
             let photos = JSON.parse(jsonInput.value || '[]');
             photos = photos.filter(p => p !== photoPath);
             jsonInput.value = JSON.stringify(photos);
             buttonElement.parentElement.remove();
+            const wrappers = document.querySelectorAll(`#preview-${sectionKey} .img-wrapper`);
+            wrappers.forEach((el,i) => el.querySelector('.photo-order').textContent = (i+1)+'.');
             Swal.fire('Terhapus!', 'Gambar berhasil dihapus.', 'success');
         }
     });
 }
 
-function removeFile(sectionKey, filePath, buttonElement) {
+function removeFile(sectionKey, filePath, buttonElement){
     Swal.fire({
         title: 'Apakah Anda yakin?',
         text: "File ini akan dihapus dari post!",
@@ -193,7 +232,7 @@ function removeFile(sectionKey, filePath, buttonElement) {
         confirmButtonText: 'Ya, hapus!',
         cancelButtonText: 'Batal'
     }).then((result) => {
-        if (result.isConfirmed) {
+        if(result.isConfirmed){
             const jsonInput = document.getElementById(`${sectionKey}_files_json`);
             let files = JSON.parse(jsonInput.value || '[]');
             files = files.filter(f => f.path !== filePath);
@@ -207,19 +246,21 @@ function removeFile(sectionKey, filePath, buttonElement) {
 document.addEventListener('DOMContentLoaded', () => {
     const sections = @json(array_keys($sections));
     sections.forEach(key => {
-        const editorEl = document.getElementById(`editor-${key}`);
+        // Quill untuk konten utama
+        const editorContainer = document.getElementById(`editor-${key}`);
         const textareaEl = document.getElementById(key);
-        const quill = new Quill(editorEl, { theme: 'snow', modules: { toolbar: [
-            [{ 'header': [1,2,3,4,5,6,false] }],
-            ['bold','italic','underline','strike'],
-            [{ 'color': [] }, { 'background': [] }],
-            [{ 'font': [] }],
-            [{ 'align': [] }],
-            [{ 'list': 'ordered' }, { 'list':'bullet' }],
-            ['link','image','code-block'],
-            ['clean']
-        ]}});
+        const quill = new Quill(editorContainer, { theme: 'snow', modules: { toolbar: toolbarOptions } });
+        quill.root.innerHTML = textareaEl.value;
         quill.on('text-change', () => textareaEl.value = quill.root.innerHTML);
+
+        // Quill untuk teks di bawah foto
+        const editorPhotoContainer = document.getElementById(`editor-${key}_photos_text`);
+        const textareaPhotoEl = document.getElementById(`${key}_photos_text`);
+        if(editorPhotoContainer){
+            const quillPhoto = new Quill(editorPhotoContainer, { theme: 'snow', modules: { toolbar: toolbarOptions } });
+            quillPhoto.root.innerHTML = textareaPhotoEl.value;
+            quillPhoto.on('text-change', () => textareaPhotoEl.value = quillPhoto.root.innerHTML);
+        }
 
         // Preview foto baru
         const inputPhoto = document.getElementById(`${key}_photos`);
@@ -233,13 +274,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     const reader = new FileReader();
                     reader.onload = ev => {
                         const wrapper = document.createElement('div');
-                        wrapper.className = 'img-wrapper';
+                        wrapper.className = 'img-wrapper relative';
+                        const orderSpan = document.createElement('span');
+                        orderSpan.className = 'photo-order';
+                        orderSpan.textContent = preview.children.length + 1 + '.';
                         const img = document.createElement('img');
                         img.src = ev.target.result;
                         img.className = 'w-24 h-24 object-cover border rounded';
                         const btn = document.createElement('span');
                         btn.innerHTML = '✖';
-                        btn.onclick = () => { wrapper.remove(); };
+                        btn.onclick = () => { wrapper.remove(); updatePhotoOrder(preview); };
+                        wrapper.appendChild(orderSpan);
                         wrapper.appendChild(img);
                         wrapper.appendChild(btn);
                         preview.appendChild(wrapper);
@@ -249,35 +294,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 inputPhoto.files = dt.files;
             });
         }
-
-        // Preview file baru
-        const inputFile = document.getElementById(`${key}_files`);
-        if(inputFile){
-            let dtFile = new DataTransfer();
-            const previewFile = document.getElementById(`file-preview-${key}`);
-            inputFile.addEventListener('change', e => {
-                const files = Array.from(e.target.files);
-                files.forEach(file => {
-                    dtFile.items.add(file);
-                    const div = document.createElement('div');
-                    div.className = 'flex items-center gap-2';
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(file);
-                    link.download = file.name;
-                    link.textContent = file.name;
-                    link.className = 'bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700';
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.textContent = '✖';
-                    btn.className = 'text-red-500 font-bold';
-                    btn.onclick = () => { div.remove(); };
-                    div.appendChild(link); div.appendChild(btn);
-                    previewFile.appendChild(div);
-                });
-                inputFile.files = dtFile.files;
-            });
-        }
     });
 });
+
+function updatePhotoOrder(preview){
+    const wrappers = preview.querySelectorAll('.img-wrapper');
+    wrappers.forEach((el,i) => el.querySelector('.photo-order').textContent = (i+1)+'.');
+}
 </script>
 @endsection

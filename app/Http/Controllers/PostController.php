@@ -12,115 +12,107 @@ use HTMLPurifier_Config;
 
 class PostController extends Controller
 {
-    // List semua post
     public function index()
     {
         $posts = Post::with('jurusan')->latest()->get();
         return view('admin.posts.index', compact('posts'));
     }
-    public function show(Post $post)
-    {
-        return view('admin.posts.show', compact('post'));
-    }
 
-
-    // Form create
     public function create()
     {
         $jurusan = Jurusan::all();
         return view('admin.posts.create', compact('jurusan'));
     }
 
-    // Simpan post baru
     public function store(Request $request)
-    {
-        $request->validate([
-            'jurusan_id' => 'required|exists:jurusans,id',
-            'title' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+{
+    $request->validate([
+        'jurusan_id' => 'required|exists:jurusans,id',
+        'title'      => 'required|string|max:255',
+        'image'      => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
 
-        $sections = [
-            'description', 'kompetensi_dasar', 'tujuan_pembelajaran',
-            'kurikulum_sinkronisasi', 'program_unggulan', 'tim_pengajar',
-            'galeri_kegiatan', 'kundudi', 'industri_pasangan'
-        ];
+    $sections = [
+        'description', 'kompetensi_dasar', 'tujuan_pembelajaran',
+        'kurikulum_sinkronisasi', 'program_unggulan', 'tim_pengajar',
+        'galeri_kegiatan', 'kundudi', 'industri_pasangan'
+    ];
 
-        // HTMLPurifier config
-        $config = HTMLPurifier_Config::createDefault();
-        $config->set('HTML.Allowed',
-            'p[style|class],br,b,i,u,strong,em,s,strike,blockquote,code,pre,' .
-            'span[style|class],div[style|class],' .
-            'ul,ol,li,h1,h2,h3,h4,h5,h6,' .
-            'table,thead,tbody,tr,td,th,' .
-            'a[href|title|target],' .
-            'img[src|alt|width|height|style|class]'
-        );
-        $config->set('Attr.AllowedClasses', [
-            'ql-align-left','ql-align-center','ql-align-right','ql-align-justify',
-            'ql-font-serif','ql-font-monospace','ql-font-sans'
-        ]);
-        $config->set('CSS.AllowedProperties', [
-            'text-align','width','height',
-            'color','background-color','font-family','font-size','font-weight','font-style'
-        ]);
-        $purifier = new HTMLPurifier($config);
+    $config = HTMLPurifier_Config::createDefault();
+    $config->set('HTML.Allowed',
+        'p[style|class],br,b,i,u,strong,em,s,strike,blockquote,code,pre,' .
+        'span[style|class],div[style|class],' .
+        'ul,ol,li,h1,h2,h3,h4,h5,h6,' .
+        'table,thead,tbody,tr,td,th,' .
+        'a[href|title|target],' .
+        'img[src|alt|width|height|style|class]'
+    );
+    $config->set('Attr.AllowedClasses', [
+        'ql-align-left','ql-align-center','ql-align-right','ql-align-justify',
+        'ql-font-serif','ql-font-monospace','ql-font-sans'
+    ]);
+    $config->set('CSS.AllowedProperties', [
+        'text-align','width','height',
+        'color','background-color','font-family','font-size','font-weight','font-style'
+    ]);
+    $purifier = new HTMLPurifier($config);
 
-        $data = [
-            'jurusan_id' => $request->jurusan_id,
-            'user_id' => auth()->id(),
-            'title' => $request->title,
-        ];
+    $data = [
+        'jurusan_id' => $request->jurusan_id,
+        'user_id'    => auth()->id(),
+        'title'      => $request->title,
+    ];
 
-        // Upload gambar utama
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $filename = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-            $data['image'] = $image->storeAs('uploads', $filename, 'public');
-        }
-
-        // Loop sections untuk text, photos, files
-        foreach ($sections as $section) {
-            // simpan teks
-            $data[$section] = $request->$section ? $purifier->purify($request->$section) : null;
-
-            // simpan photos
-            $photosKey = $section.'_photos';
-            if ($request->hasFile($photosKey)) {
-                $photos = [];
-                foreach ($request->file($photosKey) as $photo) {
-                    $filename = time() . '_' . Str::random(10) . '.' . $photo->getClientOriginalExtension();
-                    $path = $photo->storeAs('uploads', $filename, 'public');
-                    $photos[] = $path;
-                }
-                $data[$photosKey] = json_encode($photos);
-            }
-
-            // simpan files
-            $filesKey = $section.'_files';
-            if ($request->hasFile($filesKey)) {
-                $files = [];
-                foreach ($request->file($filesKey) as $file) {
-                    $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-                    $path = $file->storeAs('uploads', $filename, 'public');
-                    $files[] = [
-                        'filename' => $file->getClientOriginalName(),
-                        'path' => $path,
-                        'mime_type' => $file->getClientMimeType(),
-                        'size' => $file->getSize()
-                    ];
-                }
-                $data[$filesKey] = json_encode($files);
-            }
-        }
-
-        Post::create($data);
-
-        return redirect()->route('admin.posts.index')->with('success', 'Post berhasil dibuat.');
+    // Gambar utama
+    if ($request->hasFile('image')) {
+        $image = $request->file('image');
+        $filename = time().'_'.Str::random(10).'.'.$image->getClientOriginalExtension();
+        $data['image'] = $image->storeAs('uploads', $filename, 'public');
     }
 
+    foreach ($sections as $section) {
+        // Teks utama per section
+        $data[$section] = $request->$section ? $purifier->purify($request->$section) : null;
 
-    // Form edit
+        // Upload foto per section
+        $photosKey = $section.'_photos';
+        if ($request->hasFile($photosKey)) {
+            $photos = [];
+            foreach ($request->file($photosKey) as $photo) {
+                $filename = time().'_'.Str::random(10).'.'.$photo->getClientOriginalExtension();
+                $path = $photo->storeAs('uploads', $filename, 'public');
+                $photos[] = $path;
+            }
+            $data[$photosKey] = json_encode($photos);
+        }
+
+        // Upload file per section
+        $filesKey = $section.'_files';
+        if ($request->hasFile($filesKey)) {
+            $files = [];
+            foreach ($request->file($filesKey) as $file) {
+                $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
+                $path = $file->storeAs('uploads', $filename, 'public');
+                $files[] = [
+                    'filename' => $file->getClientOriginalName(),
+                    'path'     => $path,
+                    'mime_type'=> $file->getClientMimeType(),
+                    'size'     => $file->getSize()
+                ];
+            }
+            $data[$filesKey] = json_encode($files);
+        }
+
+        // Teks di bawah foto
+        $photosTextKey = $section.'_photos_text';
+        $data[$photosTextKey] = $request->$photosTextKey ?? null;
+    }
+
+    Post::create($data);
+
+    return redirect()->route('admin.posts.index')->with('success', 'Post berhasil dibuat.');
+}
+
     public function edit(Post $post)
     {
         $jurusan = Jurusan::all();
@@ -128,105 +120,94 @@ class PostController extends Controller
     }
 
     public function update(Request $request, Post $post)
-    {
-        $request->validate([
-            'jurusan_id' => 'required|exists:jurusans,id',
-            'title'      => 'required|string|max:255',
-            'image'      => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+{
+    $request->validate([
+        'jurusan_id' => 'required|exists:jurusans,id',
+        'title'      => 'required|string|max:255',
+        'image'      => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
 
-        $sections = [
-            'description', 'kompetensi_dasar', 'tujuan_pembelajaran',
-            'kurikulum_sinkronisasi', 'program_unggulan', 'tim_pengajar',
-            'galeri_kegiatan', 'kundudi', 'industri_pasangan'
-        ];
+    $sections = [
+        'description', 'kompetensi_dasar', 'tujuan_pembelajaran',
+        'kurikulum_sinkronisasi', 'program_unggulan', 'tim_pengajar',
+        'galeri_kegiatan', 'kundudi', 'industri_pasangan'
+    ];
 
-        // HTMLPurifier config
-        $config = HTMLPurifier_Config::createDefault();
-        $config->set('HTML.Allowed',
-            'p[style|class],br,b,i,u,strong,em,s,strike,blockquote,code,pre,' .
-            'span[style|class],div[style|class],' .
-            'ul,ol,li,h1,h2,h3,h4,h5,h6,' .
-            'table,thead,tbody,tr,td,th,' .
-            'a[href|title|target],' .
-            'img[src|alt|width|height|style|class]'
-        );
-        $config->set('Attr.AllowedClasses', [
-            'ql-align-left','ql-align-center','ql-align-right','ql-align-justify',
-            'ql-font-serif','ql-font-monospace','ql-font-sans'
-        ]);
-        $config->set('CSS.AllowedProperties', [
-            'text-align','width','height',
-            'color','background-color','font-family','font-size','font-weight','font-style'
-        ]);
-        $purifier = new HTMLPurifier($config);
+    $config = HTMLPurifier_Config::createDefault();
+    $config->set('HTML.Allowed',
+        'p[style|class],br,b,i,u,strong,em,s,strike,blockquote,code,pre,' .
+        'span[style|class],div[style|class],' .
+        'ul,ol,li,h1,h2,h3,h4,h5,h6,' .
+        'table,thead,tbody,tr,td,th,' .
+        'a[href|title|target],' .
+        'img[src|alt|width|height|style|class]'
+    );
+    $config->set('Attr.AllowedClasses', [
+        'ql-align-left','ql-align-center','ql-align-right','ql-align-justify',
+        'ql-font-serif','ql-font-monospace','ql-font-sans'
+    ]);
+    $config->set('CSS.AllowedProperties', [
+        'text-align','width','height',
+        'color','background-color','font-family','font-size','font-weight','font-style'
+    ]);
+    $purifier = new HTMLPurifier($config);
 
-        // Update data dasar
-        $post->jurusan_id = $request->jurusan_id;
-        $post->title      = $request->title;
+    // Update dasar
+    $post->jurusan_id = $request->jurusan_id;
+    $post->title      = $request->title;
 
-        foreach ($sections as $section) {
-            // Simpan konten teks
-            $post->$section = $request->$section ? $purifier->purify($request->$section) : null;
+    foreach ($sections as $section) {
+        // Teks utama
+        $post->$section = $request->$section ? $purifier->purify($request->$section) : null;
 
-            // =========================
-            // Handle photos
-            // =========================
-            $photosKey = $section.'_photos';
-            $existingPhotos = json_decode($request->input($photosKey.'_json', '[]'), true);
-            if (!is_array($existingPhotos)) $existingPhotos = [];
-
-            if ($request->hasFile($photosKey)) {
-                foreach ($request->file($photosKey) as $photo) {
-                    $filename = time().'_'.Str::random(10).'.'.$photo->getClientOriginalExtension();
-                    $path = $photo->storeAs('uploads', $filename, 'public');
-                    $existingPhotos[] = $path;
-                }
+        // Foto per section
+        $photosKey = $section.'_photos';
+        $existingPhotos = json_decode($request->input($photosKey.'_json', '[]'), true);
+        if (!is_array($existingPhotos)) $existingPhotos = [];
+        if ($request->hasFile($photosKey)) {
+            foreach ($request->file($photosKey) as $photo) {
+                $filename = time().'_'.Str::random(10).'.'.$photo->getClientOriginalExtension();
+                $path = $photo->storeAs('uploads', $filename, 'public');
+                $existingPhotos[] = $path;
             }
-            $post->$photosKey = !empty($existingPhotos) ? json_encode($existingPhotos) : null;
-
-            // =========================
-            // Handle files
-            // =========================
-            $filesKey = $section.'_files';
-            $existingFiles = json_decode($request->input($filesKey.'_json', '[]'), true);
-            if (!is_array($existingFiles)) $existingFiles = [];
-
-            if ($request->hasFile($filesKey)) {
-                foreach ($request->file($filesKey) as $file) {
-                    $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
-                    $path = $file->storeAs('uploads', $filename, 'public');
-                    $existingFiles[] = [
-                        'filename' => $file->getClientOriginalName(),
-                        'path' => $path,
-                        'mime_type' => $file->getClientMimeType(),
-                        'size' => $file->getSize()
-                    ];
-                }
-            }
-            $post->$filesKey = !empty($existingFiles) ? json_encode($existingFiles) : null;
         }
+        $post->$photosKey = !empty($existingPhotos) ? json_encode($existingPhotos) : null;
 
-        // =========================
-        // Gambar utama
-        // =========================
-        if ($request->hasFile('image')) {
-            if ($post->image) {
-                Storage::disk('public')->delete($post->image);
+        // File per section
+        $filesKey = $section.'_files';
+        $existingFiles = json_decode($request->input($filesKey.'_json', '[]'), true);
+        if (!is_array($existingFiles)) $existingFiles = [];
+        if ($request->hasFile($filesKey)) {
+            foreach ($request->file($filesKey) as $file) {
+                $filename = time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
+                $path = $file->storeAs('uploads', $filename, 'public');
+                $existingFiles[] = [
+                    'filename' => $file->getClientOriginalName(),
+                    'path'     => $path,
+                    'mime_type'=> $file->getClientMimeType(),
+                    'size'     => $file->getSize()
+                ];
             }
-            $image = $request->file('image');
-            $filename = time().'_'.Str::random(10).'.'.$image->getClientOriginalExtension();
-            $post->image = $image->storeAs('uploads', $filename, 'public');
         }
+        $post->$filesKey = !empty($existingFiles) ? json_encode($existingFiles) : null;
 
-        $post->save();
-
-        return redirect()->route('admin.posts.index')->with('success', 'Post berhasil diperbarui.');
+        // Teks di bawah foto
+        $photosTextKey = $section.'_photos_text';
+        $post->$photosTextKey = $request->$photosTextKey ?? null;
     }
 
+    // Gambar utama
+    if ($request->hasFile('image')) {
+        if ($post->image) Storage::disk('public')->delete($post->image);
+        $image = $request->file('image');
+        $filename = time().'_'.Str::random(10).'.'.$image->getClientOriginalExtension();
+        $post->image = $image->storeAs('uploads', $filename, 'public');
+    }
 
+    $post->save();
 
-
+    return redirect()->route('admin.posts.index')->with('success', 'Post berhasil diperbarui.');
+}
     // Hapus post
     public function destroy(Post $post)
     {

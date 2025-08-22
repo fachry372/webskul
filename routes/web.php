@@ -14,22 +14,16 @@ Route::get('/beranda', [BerandaController::class, 'index']);
 
 
 // Route admin
-// Route admin
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('dashboard');
 
     Route::resource('jurusan', JurusanController::class);
-
-    // Tambahkan show route
-    Route::get('posts/{post}', [PostController::class, 'show'])->name('posts.show');
-
-    Route::resource('posts', PostController::class)->except(['show']); // Hindari duplikasi
+    Route::resource('posts', PostController::class);
     Route::post('posts/upload', [PostController::class, 'upload'])->name('posts.upload');
     Route::post('posts/upload-photos', [PostController::class, 'uploadPhotos'])->name('posts.upload-photos');
 });
-
 
 // Route autentikasi
 Route::middleware(['auth'])->group(function () {

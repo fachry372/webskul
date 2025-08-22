@@ -59,8 +59,7 @@
     }
     .gallery-image {
         width: 100%;
-        height: 200px;
-        object-fit: cover;
+        object-fit: contain;
         border: 1px solid #e5e7eb;
         border-radius: 6px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -121,6 +120,7 @@
                 $content = $post->$key;
                 $photos = json_decode($post->{$key . '_photos'}, true);
                 $files = json_decode($post->{$key . '_files'}, true);
+                $photosText = $post->{$key . '_photos_text'};
             @endphp
 
             @if(!empty($content) || !empty($photos) || !empty($files))
@@ -135,23 +135,40 @@
 
                     {{-- Galeri Foto --}}
                     @if(!empty($photos) && is_array($photos))
-                        @if(count($photos) === 1)
-                            <div class="flex justify-center mt-4">
+                        @php $totalPhotos = count($photos); @endphp
+                        @if($totalPhotos === 1)
+                            <div class="relative flex justify-center mt-4">
+                                <div class="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-sm px-2 py-1 rounded">1</div>
                                 <img src="{{ Storage::url($photos[0]) }}" alt="{{ $label }} Foto"
                                      class="max-w-2xl w-full object-contain rounded-lg shadow"
                                      loading="lazy" data-aos="zoom-in">
                             </div>
+                            @if(!empty($photosText))
+                                <div class="content-html mt-4">
+                                    {!! $photosText !!}
+                                </div>
+                            @endif
                         @else
                             <div class="grid mt-4 gap-4
-                                @if(count($photos) > 4) grid-cols-4
-                                @elseif(count($photos) === 2) grid-cols-2
-                                @elseif(count($photos) === 3) grid-cols-3
-                                @else grid-cols-{{ count($photos) }} @endif">
-                                @foreach($photos as $photo)
-                                    <img src="{{ Storage::url($photo) }}" alt="{{ $label }} Foto"
-                                         class="gallery-image"
-                                         loading="lazy" data-aos="zoom-in" data-aos-delay="{{ $loop->index * 100 }}">
+                                @if($totalPhotos > 4) grid-cols-4
+                                @elseif($totalPhotos === 2) grid-cols-2
+                                @elseif($totalPhotos === 3) grid-cols-3
+                                @else grid-cols-{{ $totalPhotos }} @endif">
+                                @foreach($photos as $index => $photo)
+                                    <div class="relative flex flex-col items-center">
+                                        <div class="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-sm px-2 py-1 rounded z-10">
+                                            {{ $index + 1 }}
+                                        </div>
+                                        <img src="{{ Storage::url($photo) }}" alt="{{ $label }} Foto"
+                                             class="gallery-image rounded-lg shadow"
+                                             loading="lazy" data-aos="zoom-in" data-aos-delay="{{ $loop->index * 100 }}">
+                                    </div>
                                 @endforeach
+                                @if(!empty($photosText))
+                                    <div class="content-html col-span-full mt-4">
+                                        {!! $photosText !!}
+                                    </div>
+                                @endif
                             </div>
                         @endif
                     @endif
