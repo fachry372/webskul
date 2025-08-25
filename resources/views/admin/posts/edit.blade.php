@@ -24,14 +24,17 @@
             @enderror
         </div>
 
-        {{-- Judul --}}
-        <div class="mb-4">
-            <label for="title" class="block font-semibold">Judul</label>
-            <input type="text" name="title" id="title" class="w-full border rounded p-2 @error('title') border-red-500 @enderror" value="{{ old('title', $post->title) }}" required>
-            @error('title')
-                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+       {{-- Judul
+<div class="mb-4">
+    <label for="title" class="block font-semibold">Judul (Opsional)</label>
+    <input type="text" name="title" id="title"
+           class="w-full border rounded p-2 @error('title') border-red-500 @enderror"
+           value="{{ old('title') }}">
+    @error('title')
+        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+    @enderror
+</div> --}}
+
 
         {{-- Gambar Utama --}}
         <div class="mb-4">
@@ -177,129 +180,247 @@
 <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+
 const toolbarOptions = [
-    [{ 'header': [1,2,3,4,5,6,false] }],
-    ['bold','italic','underline','strike'],
-    [{ 'color': [] }, { 'background': [] }],
-    [{ 'font': [] }],
-    [{ 'align': [] }],
-    [{ 'list': 'ordered' }, { 'list':'bullet' }],
-    ['link','image','code-block'],
-    ['clean']
+  [{ 'header': [1,2,3,4,5,6,false] }],
+  ['bold','italic','underline','strike'],
+  [{ 'color': [] }, { 'background': [] }],
+  [{ 'font': [] }],
+  [{ 'align': [] }],
+  [{ 'list': 'ordered' }, { 'list':'bullet' }],
+  ['link','image','code-block'],
+  ['clean']
 ];
 
 function toggleCard(id) {
-    const content = document.getElementById(`content-${id}`);
-    const arrow = document.getElementById(`arrow-${id}`);
-    if(content && arrow){
-        content.style.display = content.style.display === 'none' ? 'block' : 'none';
-        arrow.classList.toggle('rotate');
-    }
+  const content = document.getElementById(`content-${id}`);
+  const arrow = document.getElementById(`arrow-${id}`);
+  if(content && arrow){
+    content.style.display = content.style.display === 'none' ? 'block' : 'none';
+    arrow.classList.toggle('rotate');
+  }
 }
 
+/** State per-section untuk file baru yang dipilih user (belum tersimpan di server) */
+const sectionState = {}; // { [sectionKey]: { newPhotos: File[], newFiles: File[] } }
+
+/** Utility: rebuild input.files dari array File[] */
+function rebuildInputFiles(inputEl, filesArr) {
+  const dt = new DataTransfer();
+  filesArr.forEach(f => dt.items.add(f));
+  inputEl.files = dt.files;
+}
+
+/** Utility: renumber photo order badge di sebuah container */
+function renumberPhotoOrder(container) {
+  const wrappers = container.querySelectorAll('.img-wrapper');
+  wrappers.forEach((el, i) => {
+    const badge = el.querySelector('.photo-order');
+    if (badge) badge.textContent = (i + 1) + '.';
+  });
+}
+
+/** Hapus FOTO LAMA (sudah ada di server) */
 function removeImage(sectionKey, photoPath, buttonElement){
-    Swal.fire({
-        title: 'Apakah Anda yakin?',
-        text: "Gambar ini akan dihapus dari post!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Ya, hapus!',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if(result.isConfirmed){
-            const jsonInput = document.getElementById(`${sectionKey}_photos_json`);
-            let photos = JSON.parse(jsonInput.value || '[]');
-            photos = photos.filter(p => p !== photoPath);
-            jsonInput.value = JSON.stringify(photos);
-            buttonElement.parentElement.remove();
-            const wrappers = document.querySelectorAll(`#preview-${sectionKey} .img-wrapper`);
-            wrappers.forEach((el,i) => el.querySelector('.photo-order').textContent = (i+1)+'.');
-            Swal.fire('Terhapus!', 'Gambar berhasil dihapus.', 'success');
-        }
-    });
+  Swal.fire({
+    title: 'Apakah Anda yakin?',
+    text: "Gambar ini akan dihapus dari post!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Ya, hapus!',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if(result.isConfirmed){
+      // 1) tandai untuk backend
+      const form = buttonElement.closest('form');
+      const del = document.createElement('input');
+      del.type = 'hidden';
+      del.name = `${sectionKey}_photos_deleted[]`;
+      del.value = photoPath;
+      form.appendChild(del);
+
+      // 2) hapus dari hidden JSON lama (agar tidak tersimpan lagi)
+      const jsonInput = document.getElementById(`${sectionKey}_photos_json`);
+      let photos = [];
+      try { photos = JSON.parse(jsonInput.value || '[]'); } catch(e) {}
+      photos = photos.filter(p => p !== photoPath);
+      jsonInput.value = JSON.stringify(photos);
+
+      // 3) hapus preview DOM
+      const preview = document.getElementById(`preview-${sectionKey}`);
+      buttonElement.parentElement.remove();
+      renumberPhotoOrder(preview);
+
+      Swal.fire('Terhapus!', 'Gambar berhasil dihapus.', 'success');
+    }
+  });
 }
 
+/** Hapus FILE LAMA (sudah ada di server) */
 function removeFile(sectionKey, filePath, buttonElement){
-    Swal.fire({
-        title: 'Apakah Anda yakin?',
-        text: "File ini akan dihapus dari post!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Ya, hapus!',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if(result.isConfirmed){
-            const jsonInput = document.getElementById(`${sectionKey}_files_json`);
-            let files = JSON.parse(jsonInput.value || '[]');
-            files = files.filter(f => f.path !== filePath);
-            jsonInput.value = JSON.stringify(files);
-            buttonElement.parentElement.remove();
-            Swal.fire('Terhapus!', 'File berhasil dihapus.', 'success');
-        }
-    });
+  Swal.fire({
+    title: 'Apakah Anda yakin?',
+    text: "File ini akan dihapus dari post!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Ya, hapus!',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if(result.isConfirmed){
+      // 1) tandai untuk backend
+      const form = buttonElement.closest('form');
+      const del = document.createElement('input');
+      del.type = 'hidden';
+      del.name = `${sectionKey}_files_deleted[]`;
+      del.value = filePath;
+      form.appendChild(del);
+
+      // 2) hapus dari hidden JSON lama (agar tidak tersimpan lagi)
+      const jsonInput = document.getElementById(`${sectionKey}_files_json`);
+      let files = [];
+      try { files = JSON.parse(jsonInput.value || '[]'); } catch(e) {}
+      files = files.filter(f => f.path !== filePath);
+      jsonInput.value = JSON.stringify(files);
+
+      // 3) hapus preview DOM
+      buttonElement.parentElement.remove();
+      Swal.fire('Terhapus!', 'File berhasil dihapus.', 'success');
+    }
+  });
+}
+
+/** Render preview untuk FOTO BARU */
+function addNewPhotoPreview(sectionKey, file){
+  const preview = document.getElementById(`preview-${sectionKey}`);
+  const wrapper = document.createElement('div');
+  wrapper.className = 'img-wrapper relative';
+  wrapper.dataset.new = '1'; // penanda foto baru (belum di server)
+
+  const orderSpan = document.createElement('span');
+  orderSpan.className = 'photo-order';
+  orderSpan.textContent = (preview.children.length + 1) + '.';
+
+  const img = document.createElement('img');
+  img.className = 'w-24 h-24 object-cover border rounded';
+
+  const btn = document.createElement('span');
+  btn.textContent = '✖';
+  btn.title = 'Hapus';
+
+  btn.onclick = () => {
+    // Cari index wrapper ini di daftar foto baru
+    const newWrappers = Array.from(preview.querySelectorAll('.img-wrapper[data-new="1"]'));
+    const idx = newWrappers.indexOf(wrapper);
+    if (idx > -1) {
+      sectionState[sectionKey].newPhotos.splice(idx, 1);
+      wrapper.remove();
+      // rebuild input.files agar file yang dihapus tidak dikirim
+      const inputPhoto = document.getElementById(`${sectionKey}_photos`);
+      rebuildInputFiles(inputPhoto, sectionState[sectionKey].newPhotos);
+      renumberPhotoOrder(preview);
+    }
+  };
+
+  wrapper.appendChild(orderSpan);
+  wrapper.appendChild(img);
+  wrapper.appendChild(btn);
+  preview.appendChild(wrapper);
+
+  const reader = new FileReader();
+  reader.onload = ev => { img.src = ev.target.result; };
+  reader.readAsDataURL(file);
+}
+
+/** Render preview untuk FILE BARU (dokumen) */
+function addNewFilePreview(sectionKey, file){
+  const list = document.getElementById(`file-preview-${sectionKey}`);
+  const row = document.createElement('div');
+  row.className = 'flex items-center gap-2';
+  row.dataset.new = '1'; // penanda file baru
+
+  const name = document.createElement('span');
+  name.textContent = file.name;
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'text-red-500 font-bold';
+  btn.textContent = '✖';
+  btn.title = 'Hapus';
+
+  btn.onclick = () => {
+    const newRows = Array.from(list.querySelectorAll('div[data-new="1"]'));
+    const idx = newRows.indexOf(row);
+    if (idx > -1) {
+      sectionState[sectionKey].newFiles.splice(idx, 1);
+      row.remove();
+      // rebuild input.files agar file yang dihapus tidak terkirim
+      const inputFiles = document.getElementById(`${sectionKey}_files`);
+      rebuildInputFiles(inputFiles, sectionState[sectionKey].newFiles);
+    }
+  };
+
+  row.appendChild(name);
+  row.appendChild(btn);
+  list.appendChild(row);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const sections = @json(array_keys($sections));
-    sections.forEach(key => {
-        // Quill untuk konten utama
-        const editorContainer = document.getElementById(`editor-${key}`);
-        const textareaEl = document.getElementById(key);
-        const quill = new Quill(editorContainer, { theme: 'snow', modules: { toolbar: toolbarOptions } });
-        quill.root.innerHTML = textareaEl.value;
-        quill.on('text-change', () => textareaEl.value = quill.root.innerHTML);
+  // Sections dari PHP
+  const sections = @json(array_keys($sections));
 
-        // Quill untuk teks di bawah foto
-        const editorPhotoContainer = document.getElementById(`editor-${key}_photos_text`);
-        const textareaPhotoEl = document.getElementById(`${key}_photos_text`);
-        if(editorPhotoContainer){
-            const quillPhoto = new Quill(editorPhotoContainer, { theme: 'snow', modules: { toolbar: toolbarOptions } });
-            quillPhoto.root.innerHTML = textareaPhotoEl.value;
-            quillPhoto.on('text-change', () => textareaPhotoEl.value = quillPhoto.root.innerHTML);
-        }
+  sections.forEach(key => {
+    sectionState[key] = { newPhotos: [], newFiles: [] };
 
-        // Preview foto baru
-        const inputPhoto = document.getElementById(`${key}_photos`);
-        if(inputPhoto){
-            let dt = new DataTransfer();
-            inputPhoto.addEventListener('change', e => {
-                const files = Array.from(e.target.files);
-                const preview = document.getElementById(`preview-${key}`);
-                files.forEach(file => {
-                    dt.items.add(file);
-                    const reader = new FileReader();
-                    reader.onload = ev => {
-                        const wrapper = document.createElement('div');
-                        wrapper.className = 'img-wrapper relative';
-                        const orderSpan = document.createElement('span');
-                        orderSpan.className = 'photo-order';
-                        orderSpan.textContent = preview.children.length + 1 + '.';
-                        const img = document.createElement('img');
-                        img.src = ev.target.result;
-                        img.className = 'w-24 h-24 object-cover border rounded';
-                        const btn = document.createElement('span');
-                        btn.innerHTML = '✖';
-                        btn.onclick = () => { wrapper.remove(); updatePhotoOrder(preview); };
-                        wrapper.appendChild(orderSpan);
-                        wrapper.appendChild(img);
-                        wrapper.appendChild(btn);
-                        preview.appendChild(wrapper);
-                    };
-                    reader.readAsDataURL(file);
-                });
-                inputPhoto.files = dt.files;
-            });
-        }
-    });
+    // ====== Quill untuk konten utama ======
+    const editorContainer = document.getElementById(`editor-${key}`);
+    const textareaEl = document.getElementById(key);
+    if (editorContainer && textareaEl) {
+      const quill = new Quill(editorContainer, { theme: 'snow', modules: { toolbar: toolbarOptions } });
+      quill.root.innerHTML = textareaEl.value || '';
+      quill.on('text-change', () => textareaEl.value = quill.root.innerHTML);
+    }
+
+    // ====== Quill untuk teks di bawah foto ======
+    const editorPhotoContainer = document.getElementById(`editor-${key}_photos_text`);
+    const textareaPhotoEl = document.getElementById(`${key}_photos_text`);
+    if(editorPhotoContainer && textareaPhotoEl){
+      const quillPhoto = new Quill(editorPhotoContainer, { theme: 'snow', modules: { toolbar: toolbarOptions } });
+      quillPhoto.root.innerHTML = textareaPhotoEl.value || '';
+      quillPhoto.on('text-change', () => textareaPhotoEl.value = quillPhoto.root.innerHTML);
+    }
+
+    // ====== FOTO BARU: input change + preview + hapus ======
+    const inputPhoto = document.getElementById(`${key}_photos`);
+    if (inputPhoto) {
+      inputPhoto.addEventListener('change', e => {
+        const files = Array.from(e.target.files || []);
+        files.forEach(file => {
+          sectionState[key].newPhotos.push(file);
+          addNewPhotoPreview(key, file);
+        });
+        // rebuild agar inputPhoto.files = semua foto baru yang masih ada
+        rebuildInputFiles(inputPhoto, sectionState[key].newPhotos);
+      });
+    }
+
+    // ====== FILE BARU (dokumen): input change + preview + hapus ======
+    const inputFiles = document.getElementById(`${key}_files`);
+    if (inputFiles) {
+      inputFiles.addEventListener('change', e => {
+        const files = Array.from(e.target.files || []);
+        files.forEach(file => {
+          sectionState[key].newFiles.push(file);
+          addNewFilePreview(key, file);
+        });
+        rebuildInputFiles(inputFiles, sectionState[key].newFiles);
+      });
+    }
+  });
 });
-
-function updatePhotoOrder(preview){
-    const wrappers = preview.querySelectorAll('.img-wrapper');
-    wrappers.forEach((el,i) => el.querySelector('.photo-order').textContent = (i+1)+'.');
-}
 </script>
 @endsection
+

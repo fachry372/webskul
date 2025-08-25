@@ -23,14 +23,16 @@
             @enderror
         </div>
 
-        {{-- Judul --}}
-        <div class="mb-4">
-            <label for="title" class="block font-semibold">Judul</label>
-            <input type="text" name="title" id="title" class="w-full border rounded p-2 @error('title') border-red-500 @enderror" value="{{ old('title') }}" required>
-            @error('title')
-                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+       {{-- Judul
+<div class="mb-4">
+    <label for="title" class="block font-semibold">Judul (Opsional)</label>
+    <input type="text" name="title" id="title"
+           class="w-full border rounded p-2 @error('title') border-red-500 @enderror"
+           value="{{ old('title') }}">
+    @error('title')
+        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+    @enderror
+</div> --}}
 
         {{-- Gambar Utama --}}
         <div class="mb-4">

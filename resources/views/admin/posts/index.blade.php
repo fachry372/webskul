@@ -9,7 +9,7 @@
     <table class="w-full border-collapse">
         <thead>
             <tr class="bg-gray-100">
-                <th class="border p-2">Judul</th>
+                {{-- <th class="border p-2">Judul</th> --}}
                 <th class="border p-2">Jurusan</th>
                 <th class="border p-2">Aksi</th>
             </tr>
@@ -17,9 +17,9 @@
         <tbody>
             @forelse ($posts as $post)
                 <tr>
-                    <td class="border p-2">{{ $post->title }}</td>
+                    {{-- <td class="border p-2">{{ $post->title }}</td> --}}
                     <td class="border p-2">{{ $post->jurusan->name }}</td>
-                    <td class="border p-2">
+                    <td class="border p-2 text-center">
                         {{-- <a href="{{ route('admin.posts.show', $post) }}" class="text-blue-600 hover:underline">Lihat</a> --}}
                         <a href="{{ route('admin.posts.edit', $post) }}" class="text-blue-600 hover:underline ml-2">Edit</a>
                         <form action="{{ route('admin.posts.destroy', $post) }}" method="POST" class="inline-block">

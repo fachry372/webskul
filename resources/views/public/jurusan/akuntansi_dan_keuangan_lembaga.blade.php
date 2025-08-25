@@ -57,15 +57,22 @@
         margin: 1rem auto;
         display: block;
     }
-    .gallery-image {
-        width: 100%;
-        object-fit: contain;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease;
-    }
-    .gallery-image:hover { transform: scale(1.05); }
+
+/* Foto grid konsisten, full tanpa latar putih */
+.gallery-image {
+    width: 100%;
+    height: 250px; /* tinggi seragam */
+    object-fit: cover; /* isi penuh, tidak ada ruang kosong */
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.gallery-image:hover {
+    transform: scale(1.05);
+}
+
+
     .download-btn {
         display: inline-block;
         background-color: #3b82f6;
@@ -160,7 +167,7 @@
                                             {{ $index + 1 }}
                                         </div>
                                         <img src="{{ Storage::url($photo) }}" alt="{{ $label }} Foto"
-                                             class="gallery-image rounded-lg shadow"
+                                             class="gallery-image"
                                              loading="lazy" data-aos="zoom-in" data-aos-delay="{{ $loop->index * 100 }}">
                                     </div>
                                 @endforeach
