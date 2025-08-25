@@ -336,14 +336,17 @@ function addNewPhotoPreview(sectionKey, file){
 }
 
 /** Render preview untuk FILE BARU (dokumen) */
+/** Render preview untuk FILE BARU (dokumen) */
 function addNewFilePreview(sectionKey, file){
   const list = document.getElementById(`file-preview-${sectionKey}`);
   const row = document.createElement('div');
   row.className = 'flex items-center gap-2';
   row.dataset.new = '1'; // penanda file baru
 
-  const name = document.createElement('span');
-  name.textContent = file.name;
+  // Buat tampilan sama seperti file lama: box biru
+  const fileLink = document.createElement('div');
+  fileLink.className = 'bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 cursor-default';
+  fileLink.textContent = file.name;
 
   const btn = document.createElement('button');
   btn.type = 'button';
@@ -363,10 +366,11 @@ function addNewFilePreview(sectionKey, file){
     }
   };
 
-  row.appendChild(name);
+  row.appendChild(fileLink);
   row.appendChild(btn);
   list.appendChild(row);
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
   // Sections dari PHP

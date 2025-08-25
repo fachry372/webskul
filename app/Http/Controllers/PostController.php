@@ -17,10 +17,11 @@ class PostController extends Controller
         $posts = Post::with('jurusan')->latest()->get();
         return view('admin.posts.index', compact('posts'));
     }
-
     public function create()
     {
-        $jurusan = Jurusan::all();
+        // Ambil jurusan yang belum memiliki post
+        $jurusan = Jurusan::doesntHave('posts')->get();
+
         return view('admin.posts.create', compact('jurusan'));
     }
 
@@ -113,11 +114,16 @@ class PostController extends Controller
     return redirect()->route('admin.posts.index')->with('success', 'Post berhasil dibuat.');
 }
 
-    public function edit(Post $post)
-    {
-        $jurusan = Jurusan::all();
-        return view('admin.posts.edit', compact('post', 'jurusan'));
-    }
+
+public function edit(Post $post)
+{
+    // Ambil jurusan yang belum memiliki post atau jurusan yang sedang dipakai post ini
+    $jurusan = Jurusan::whereDoesntHave('posts')
+                ->orWhere('id', $post->jurusan_id)
+                ->get();
+
+    return view('admin.posts.edit', compact('post', 'jurusan'));
+}
 
     public function update(Request $request, Post $post)
     {

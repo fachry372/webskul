@@ -2,59 +2,89 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Http\RedirectResponse;
+use App\Models\Profile;
+use App\Models\Menu;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
+use Illuminate\Support\Str;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
-    public function edit(Request $request): View
+
+    // =========================
+    // CRUD Profile
+    // =========================
+
+    // Tampilkan semua profile
+    public function index()
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
+        $profiles = Profile::with('menus')->get(); // Ambil semua profile beserta menunya
+        return view('admin.profiles.index', compact('profiles'));
     }
 
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    // Form tambah profile
+    public function create()
     {
-        $request->user()->fill($request->validated());
+        return view('admin.profiles.create');
+    }
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+    // Simpan profile baru
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255|unique:profiles',
+        ]);
+
+        Profile::create([
+            'title' => $request->title,
+            'slug'  => Str::slug($request->title), // otomatis bikin slug
+        ]);
+
+        return redirect()->route('profiles.index')->with('success', 'Profil berhasil ditambahkan');
+    }
+
+    // Form edit profile
+    public function edit(Profile $profile)
+    {
+        return view('admin.profiles.edit', compact('profile'));
+    }
+
+    // Update profile
+    public function update(Request $request, Profile $profile)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255|unique:profiles,title,' . $profile->id,
+        ]);
+
+        $profile->update([
+            'title' => $request->title,
+            'slug'  => Str::slug($request->title),
+        ]);
+
+        return redirect()->route('profiles.index')->with('success', 'Profil berhasil diperbarui');
+    }
+
+    // Hapus profile
+    public function destroy(Profile $profile)
+    {
+        foreach ($profile->menus as $menu) {
+            $photos = json_decode($menu->content_section_photos, true) ?? [];
+            $files  = json_decode($menu->content_section_files, true) ?? [];
+
+            if (
+                !empty($menu->content) ||
+                count($photos) > 0 ||
+                count($files) > 0
+            ) {
+                return redirect()->route('profiles.index')
+                    ->with('error', 'Profile ini memiliki menu dengan konten, sehingga tidak dapat dihapus.');
+            }
         }
 
-        $request->user()->save();
-
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        $profile->delete();
+        return redirect()->route('profiles.index')->with('success', 'Profil berhasil dihapus');
     }
 
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
-    {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
 
-        $user = $request->user();
 
-        Auth::logout();
 
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
-    }
 }

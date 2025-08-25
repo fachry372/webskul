@@ -68,47 +68,43 @@
                     class="{{ request()->routeIs('beranda') ? 'text-green-500 border-b-2 border-green-500' : 'hover:text-green-500 hover:border-b-2 hover:border-green-500' }} pb-1">Beranda</a>
             </li>
 
-            <!-- Dropdowns -->
             @php
-    $dropdowns = [
-        'Profil' => [
-            'Data Pokok Sekolah' => '#',
-            'Visi dan Misi' => '#',
-            'Struktur Organisasi' => '#',
-            'Profil Kepala Sekolah' => '#',
-            'Program Unggulan “CEREN”' => '#',
-            'Data Siswa' => '#',
-            'Roadmap' => '#',
-            'Denah' => '#',
-            'Sarana, Prasarana Kegiatan Produktif Siswa' => '#',
-            'Ekstrakurikuler' => '#',
-            'Prestasi Sekolah' => '#',
-        ],
-        // Ganti baris ini dengan variabel yang dikirim dari controller
-        'Kompetensi Keahlian' => $kompetensiKeahlian,
-        'Implementasi IKM' => [
-            'Implementasi P5' => '#',
-            'Modul Ajar' => '#',
-            'KSP' => '#',
-            'Vidio Pembelajaran' => '#',
-        ],
-    ];
-@endphp
-            @foreach ($dropdowns as $title => $items)
-                <li class="relative group">
-                    <a href="#" onclick="event.preventDefault();"
-                        class="pb-1 hover:text-green-500 hover:border-b-2 hover:border-green-500">
-                        {{ $title }}
-                    </a>
-                    <ul class="absolute left-0 top-full bg-white shadow-md rounded-md w-64 py-2 z-50 hidden group-hover:block">
-                        @foreach ($items as $item => $url)
-                            <li><a href="{{ $url }}"
-                                    class="block px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-green-100">{{ $item }}</a>
-                            </li>
-                        @endforeach
-                    </ul>
-                </li>
-            @endforeach
+            use Illuminate\Support\Str;
+
+            // Ambil dari DB
+            $profileMenus = app(\App\Http\Controllers\PublicProfileController::class)->getProfileMenu();
+            $kompetensiKeahlian = app(\App\Http\Controllers\PublicJurusanController::class)->getJurusanMenu();
+
+            $dropdowns = [
+                'Profil' => $profileMenus,
+                'Kompetensi Keahlian' => $kompetensiKeahlian,
+                'Implementasi IKM' => [
+                    'Implementasi P5' => '#',
+                    'Modul Ajar' => '#',
+                    'KSP' => '#',
+                    'Video Pembelajaran' => '#',
+                ],
+            ];
+        @endphp
+
+@foreach ($dropdowns as $title => $items)
+<li class="relative group">
+    <a href="#" onclick="event.preventDefault();"
+        class="pb-1 hover:text-green-500 hover:border-b-2 hover:border-green-500">
+        {{ $title }}
+    </a>
+    <ul class="absolute left-0 top-full bg-white shadow-md rounded-md w-64 py-2 z-50 hidden group-hover:block">
+        @foreach ($items as $item => $url)
+            <li>
+                <a href="{{ $url }}"
+                    class="block px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-green-100">
+                    {{ $item }}
+                </a>
+            </li>
+        @endforeach
+    </ul>
+</li>
+@endforeach
 
             <!-- Galeri & Kelulusan -->
             <li><a href="#"
@@ -197,37 +193,38 @@
             </div>
         </div>
 
-        <!-- SUBMENU: PROFIL -->
-        <div id="submenu-profil" class="absolute right-0 w-3/4 h-full bg-[#1a1a1a] text-white transform translate-x-full transition-transform duration-300 top-0 p-6 z-20">
-            <div class="flex items-center mb-6">
-                <button onclick="closeSubmenu('profil')" class="flex items-center gap-2 text-white/80">
-                    <i class="fas fa-arrow-left text-xl"></i> <span>Kembali</span>
-                </button>
-            </div>
-            <ul class="font-semibold text-base text-white/80 divide-y divide-white/30">
-                @foreach ($dropdowns['Profil'] as $item => $url)
-                    <li class="py-4">
-                        <a href="{{ $url }}" class="block hover:text-green-400">{{ $item }}</a>
-                    </li>
-                @endforeach
-            </ul>
-        </div>
+       <!-- SUBMENU: PROFIL -->
+<div id="submenu-profil" class="absolute right-0 w-3/4 h-full bg-[#1a1a1a] text-white transform translate-x-full transition-transform duration-300 top-0 p-6 z-20">
+    <div class="flex items-center mb-6">
+        <button onclick="closeSubmenu('profil')" class="flex items-center gap-2 text-white/80">
+            <i class="fas fa-arrow-left text-xl"></i> <span>Kembali</span>
+        </button>
+    </div>
+    <ul class="font-semibold text-base text-white/80 divide-y divide-white/30">
+        @foreach ($dropdowns['Profil'] as $item => $url)
+            <li class="py-4">
+                <a href="{{ $url }}" class="block hover:text-green-400">{{ $item }}</a>
+            </li>
+        @endforeach
+    </ul>
+</div>
 
-        <!-- SUBMENU: KOMPETENSI -->
-        <div id="submenu-kompetensi" class="absolute right-0 w-3/4 h-full bg-[#1a1a1a] text-white transform translate-x-full transition-transform duration-300 top-0 p-6 z-20">
-            <div class="flex items-center mb-6">
-                <button onclick="closeSubmenu('kompetensi')" class="flex items-center gap-2 text-white/80">
-                    <i class="fas fa-arrow-left text-xl"></i> <span>Kembali</span>
-                </button>
-            </div>
-            <ul class="font-semibold text-base text-white/80 divide-y divide-white/30">
-                @foreach ($jurusans as $jurusan)
-                    <li class="py-4">
-                        <a href="{{ route('jurusan.show', Str::slug($jurusan->name)) }}" class="block hover:text-green-400">{{ $jurusan->name }}</a>
-                    </li>
-                @endforeach
-            </ul>
-        </div>
+<!-- SUBMENU: KOMPETENSI -->
+<div id="submenu-kompetensi" class="absolute right-0 w-3/4 h-full bg-[#1a1a1a] text-white transform translate-x-full transition-transform duration-300 top-0 p-6 z-20">
+    <div class="flex items-center mb-6">
+        <button onclick="closeSubmenu('kompetensi')" class="flex items-center gap-2 text-white/80">
+            <i class="fas fa-arrow-left text-xl"></i> <span>Kembali</span>
+        </button>
+    </div>
+    <ul class="font-semibold text-base text-white/80 divide-y divide-white/30">
+        @foreach ($dropdowns['Kompetensi Keahlian'] as $item => $url)
+            <li class="py-4">
+                <a href="{{ $url }}" class="block hover:text-green-400">{{ $item }}</a>
+            </li>
+        @endforeach
+    </ul>
+</div>
+
 
         <!-- SUBMENU: LAINNYA -->
         <div id="submenu-lainnya" class="absolute right-0 w-3/4 h-full bg-[#1a1a1a] text-white transform translate-x-full transition-transform duration-300 top-0 p-6 z-20">
