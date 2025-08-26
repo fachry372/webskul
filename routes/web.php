@@ -62,4 +62,11 @@ use App\Http\Controllers\PublicProfileController;
 Route::get('/profil/{slug}', [PublicProfileController::class, 'showByProfile'])->name('profil.show');
 
 
+use App\Http\Controllers\IkmController;
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('ikm', IkmController::class);
+});
+
+
 require __DIR__.'/auth.php';

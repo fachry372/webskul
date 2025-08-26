@@ -58,19 +58,22 @@
         display: block;
     }
 
-/* Foto grid konsisten, full tanpa latar putih */
-.gallery-image {
-    width: 100%;
-    height: 250px; /* tinggi seragam */
-    object-fit: cover; /* isi penuh, tidak ada ruang kosong */
+    .gallery-image {
+    width: 100%;         /* lebar penuh container */
+    height: auto;        /* tinggi mengikuti rasio asli */
+    object-fit: contain; /* tampil seluruh gambar, tidak crop */
     border-radius: 6px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     transition: transform 0.3s ease;
+    display: block;
+    margin: 0 auto;
+    background-color: #f3f4f6; /* latar supaya rapi */
 }
-
 .gallery-image:hover {
     transform: scale(1.05);
 }
+
+
 
 
     .download-btn {

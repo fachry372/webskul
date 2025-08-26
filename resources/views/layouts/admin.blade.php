@@ -211,64 +211,131 @@
 </head>
 <body class="min-h-screen bg-white">
     <button class="toggle-btn lg:hidden">☰</button>
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <img src="{{ asset('images/logo.jpeg') }}" alt="SMK Negeri 1 Subang Logo">
-            <span>SMKN 1 Subang</span>
+    <div class="sidebar" style="width: 280px;">
+        <div class="sidebar-header" style="padding-bottom:0rem;">
+            <img src="{{ asset('images/logo.jpeg') }}" alt="SMK Negeri 1 Subang Logo" style="width:45px;height:45px;margin-right:0.5rem;">
+            <span style="font-size:1.3rem;font-weight:600;">SMKN 1 Subang</span>
         </div>
         <nav class="sidebar-nav">
             {{-- Dashboard --}}
-            <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <a href="{{ route('admin.dashboard') }}"
+               class="flex items-center px-5 py-3 rounded hover:bg-gray-300 transition w-full text-lg mb-2
+                      {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
                 Dashboard
             </a>
 
-            {{-- Jurusan --}}
-            <a href="{{ route('admin.jurusan.index') }}" class="{{ request()->routeIs('admin.jurusan.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 0 018 0z" />
-                </svg>
-                Jurusan
-            </a>
+           {{-- Dropdown Profil --}}
+<div class="relative mb-2" x-data="{ open: {{ request()->routeIs('profiles.*') || request()->routeIs('menus.*') ? 'true' : 'false' }} }">
+    <a href="#" @click.prevent="open = !open"
+       class="relative flex items-center pl-5 py-3 w-full rounded hover:bg-gray-300 transition text-lg
+              {{ (request()->routeIs('profiles.*') || request()->routeIs('menus.*')) ? 'active' : '' }}">
+        <span class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M5.121 17.804A7.5 7.5 0 0112 15.5a7.5 7.5 0 016.879 2.304M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Profil
+        </span>
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="w-5 h-5 absolute right-0 mr-2 transform transition-transform duration-200"
+             :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+    </a>
 
-            {{-- Posts Jurusan --}}
-            <a href="{{ route('admin.posts.index') }}" class="{{ request()->routeIs('admin.posts.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 0 018 0z" />
-                </svg>
-                Posts Jurusan
-            </a>
+    <div x-show="open" x-transition class="ml-6 mt-1.5 space-y-1.5">
+        <a href="{{ route('profiles.index') }}"
+           class="flex items-center px-4 py-2 rounded hover:bg-gray-200 transition text-lg
+                  {{ request()->routeIs('profiles.*') ? 'active' : '' }}">
+            Profil
+        </a>
+        <a href="{{ route('menus.index', 1) }}"
+           class="flex items-center px-4 py-2 rounded hover:bg-gray-200 transition text-lg
+                  {{ request()->routeIs('menus.*') ? 'active' : '' }}">
+            Menu Profil
+        </a>
+    </div>
+</div>
 
-            {{-- Profil --}}
-            <a href="{{ route('profiles.index') }}" class="{{ request()->routeIs('admin.profiles.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M5.121 17.804A7.5 7.5 0 0112 15.5a7.5 7.5 0 016.879 2.304M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                Profil
-            </a>
+{{-- Dropdown Kompetensi Keahlian / Jurusan --}}
+<div class="relative mb-2" x-data="{ open: {{ request()->routeIs('admin.jurusan.*') || request()->routeIs('admin.posts.*') ? 'true' : 'false' }} }">
+    <a href="#" @click.prevent="open = !open"
+       class="relative flex items-center pl-5 py-3 w-full rounded hover:bg-gray-300 transition text-lg
+              {{ (request()->routeIs('admin.jurusan.*') || request()->routeIs('admin.posts.*')) ? 'active' : '' }}">
+        <span class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 0 018 0z"/>
+            </svg>
+            Kompetensi Keahlian
+        </span>
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="w-5 h-5 absolute right-0 mr-2 transform transition-transform duration-200"
+             :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+    </a>
 
-            {{-- Menu Profil --}}
-            <a href="{{ route('menus.index', 1) }}"
-               class="{{ request()->routeIs('admin.menus.*') ? 'active' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                Menu Profil
-            </a>
+    <div x-show="open" x-transition class="ml-6 mt-1.5 space-y-1.5">
+        <a href="{{ route('admin.jurusan.index') }}"
+           class="flex items-center px-4 py-2 rounded hover:bg-gray-200 transition text-lg
+                  {{ request()->routeIs('admin.jurusan.*') ? 'active' : '' }}">
+            Jurusan
+        </a>
+        <a href="{{ route('admin.posts.index') }}"
+           class="flex items-center px-4 py-2 rounded hover:bg-gray-200 transition text-lg
+                  {{ request()->routeIs('admin.posts.*') ? 'active' : '' }}">
+            Posts Jurusan
+        </a>
+    </div>
+</div>
+{{-- Dropdown IKM --}}
+<div class="relative mb-2"
+     x-data="{ open: {{ request()->routeIs('admin.ikm.*') || request()->routeIs('admin.ikm-konten.*') ? 'true' : 'false' }} }">
+
+    <a href="#" @click.prevent="open = !open"
+       class="relative flex items-center pl-5 py-3 w-full rounded hover:bg-gray-300 transition text-lg
+              {{ (request()->routeIs('admin.ikm.*') || request()->routeIs('admin.ikm-konten.*')) ? 'active' : '' }}">
+        <span class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 17v-6h6v6m2 4H7a2 2 0 01-2-2V7a2 2 0 012-2h5l2 2h5a2 2 0 012 2v10a2 2 0 01-2 2z"/>
+            </svg>
+            IKM
+        </span>
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="w-5 h-5 absolute right-0 mr-2 transform transition-transform duration-200"
+             :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+    </a>
+
+    <div x-show="open" x-transition class="ml-6 mt-1.5 space-y-1.5">
+        <a href="{{ route('admin.ikm.index') }}"
+           class="flex items-center px-4 py-2 rounded hover:bg-gray-200 transition text-lg
+                  {{ request()->routeIs('admin.ikm.*') ? 'active' : '' }}">
+            Judul IKM
+        </a>
+        {{-- <a href="{{ route('admin.ikm-konten.index') }}"
+           class="flex items-center px-4 py-2 rounded hover:bg-gray-200 transition text-lg
+                  {{ request()->routeIs('admin.ikm-konten.*') ? 'active' : '' }}">
+            Konten IKM
+        </a> --}}
+    </div>
+</div>
+
+
 
             {{-- Logout --}}
-            <div class="logout-container">
+            <div class="logout-container mt-4">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="logout-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <button type="submit" class="logout-btn flex items-center px-5 py-3 rounded hover:bg-red-300 text-lg w-full transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M17 16l4-4m0 0l-4-4m4 4H7m5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h3a3 3 0 013 3v1" />
                         </svg>
@@ -279,6 +346,8 @@
         </nav>
 
     </div>
+
+
     <div class="main-content">
         <header class="header">
             <h1 class="text-3xl">Admin Dashboard</h1>
