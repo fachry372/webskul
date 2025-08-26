@@ -68,5 +68,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('ikm', IkmController::class);
 });
 
+use App\Http\Controllers\IkmKontenController;
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('ikm_konten', IkmKontenController::class);
+    Route::delete('/admin/ikm_konten/block/{block}', [IkmKontenController::class, 'destroy'])->name('admin.ikm_konten.block.destroy');
+
+});
+
+use App\Http\Controllers\PublicIkmController;
+
+Route::get('/ikm/{slug}', [PublicIkmController::class, 'showByIkm'])->name('ikm.show');
+
 
 require __DIR__.'/auth.php';

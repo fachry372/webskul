@@ -74,16 +74,12 @@
             // Ambil dari DB
             $profileMenus = app(\App\Http\Controllers\PublicProfileController::class)->getProfileMenu();
             $kompetensiKeahlian = app(\App\Http\Controllers\PublicJurusanController::class)->getJurusanMenu();
+            $ikmMenus = app(\App\Http\Controllers\PublicIkmController::class)->getIkmMenu();
 
             $dropdowns = [
                 'Profil' => $profileMenus,
                 'Kompetensi Keahlian' => $kompetensiKeahlian,
-                'Implementasi IKM' => [
-                    'Implementasi P5' => '#',
-                    'Modul Ajar' => '#',
-                    'KSP' => '#',
-                    'Video Pembelajaran' => '#',
-                ],
+                'Implementasi IKM' =>   $ikmMenus,
             ];
         @endphp
 

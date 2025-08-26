@@ -295,11 +295,11 @@
 </div>
 {{-- Dropdown IKM --}}
 <div class="relative mb-2"
-     x-data="{ open: {{ request()->routeIs('admin.ikm.*') || request()->routeIs('admin.ikm-konten.*') ? 'true' : 'false' }} }">
+     x-data="{ open: {{ request()->routeIs('admin.ikm.*') || request()->routeIs('admin.ikm_konten.*') ? 'true' : 'false' }} }">
 
     <a href="#" @click.prevent="open = !open"
        class="relative flex items-center pl-5 py-3 w-full rounded hover:bg-gray-300 transition text-lg
-              {{ (request()->routeIs('admin.ikm.*') || request()->routeIs('admin.ikm-konten.*')) ? 'active' : '' }}">
+              {{ (request()->routeIs('admin.ikm.*') || request()->routeIs('admin.ikm_konten.*')) ? 'active' : '' }}">
         <span class="flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -320,11 +320,11 @@
                   {{ request()->routeIs('admin.ikm.*') ? 'active' : '' }}">
             Judul IKM
         </a>
-        {{-- <a href="{{ route('admin.ikm-konten.index') }}"
+        <a href="{{ route('admin.ikm_konten.index') }}"
            class="flex items-center px-4 py-2 rounded hover:bg-gray-200 transition text-lg
-                  {{ request()->routeIs('admin.ikm-konten.*') ? 'active' : '' }}">
+                  {{ request()->routeIs('admin.ikm_konten.*') ? 'active' : '' }}">
             Konten IKM
-        </a> --}}
+        </a>
     </div>
 </div>
 
