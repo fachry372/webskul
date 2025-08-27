@@ -6,16 +6,28 @@ use Illuminate\Database\Eloquent\Model;
 
 class IkmKontenBlock extends Model
 {
-    protected $fillable = ['ikm_konten_id', 'title', 'text', 'photos', 'videos', 'files'];
+    protected $table = 'ikm_konten_blocks';
 
-    protected $casts = [
-        'photos' => 'array',
-        'videos' => 'array',
-        'files' => 'array',
+    protected $fillable = [
+        'ikm_konten_id',
+        'title',
+        'text',
+        'photos',
+        'videos',
+        'videos_link',
+        'files',
     ];
 
+    protected $casts = [
+        'photos'      => 'array',
+        'videos'      => 'array',
+        'videos_link' => 'array',
+        'files'       => 'array',
+    ];
+
+    // Relasi ke konten induk
     public function ikmKonten()
     {
-        return $this->belongsTo(IkmKonten::class);
+        return $this->belongsTo(IkmKonten::class, 'ikm_konten_id');
     }
 }

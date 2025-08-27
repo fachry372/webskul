@@ -5,19 +5,20 @@
 @section('styles')
 <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
 <style>
-.card { border: 1px solid #ccc; border-radius: 6px; margin-bottom: 1rem; }
+.card { border: 1px solid #ccc; border-radius: 6px; margin-bottom: 1rem; padding: 1rem; }
 .card-header { background: #f3f4f6; padding: 0.5rem 1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
 .card-header:hover { background: #e5e7eb; }
-.card-header h3 { display: flex; align-items: center; gap: 0.5rem; }
-.arrow { display: inline-block; transition: transform 0.3s ease; }
-.arrow.down { transform: rotate(90deg); }
-.card-body { max-height: 1000px; overflow: hidden; transition: max-height 0.3s ease; padding: 1rem; border-top: 1px solid #ccc; }
-.card-body.collapsed { max-height: 0; padding: 0 1rem; }
 .ql-editor { min-height: 150px; background: #fff; border: 1px solid #ccc; border-radius: 4px; }
 .gallery img, .gallery video { width: 120px; height: 120px; object-fit: cover; border-radius: 4px; margin-right: 0.5rem; margin-bottom: 0.5rem; }
-.img-wrapper { position: relative; display: inline-block; }
-.img-wrapper span { position: absolute; top: -6px; right: -6px; background: #dc2626; color: white; font-size: 16px; border-radius: 50%; width: 24px; height: 24px; line-height: 22px; text-align: center; cursor: pointer; }
-.download-btn { display: block; margin-bottom: 4px; color: #2563eb; text-decoration: underline; }
+.img-wrapper { position: relative; display: inline-block; margin-right:0.5rem; margin-bottom:0.5rem; }
+.img-wrapper span { position: absolute; top: -6px; right: -6px; background: #dc2626; color: white; font-size: 16px; border-radius: 50%; width: 24px; height: 24px; line-height: 22px; text-align: center; cursor: pointer; font-weight: bold; }
+.toggle-block { display: inline-block; transition: transform 0.3s ease; }
+.card-body { overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; }
+.card-body.closed { max-height: 0; padding-top: 0; padding-bottom: 0; }
+.card-body.open { max-height: 2000px; padding-top: 1rem; padding-bottom: 1rem; }
+.link-input { display: flex; align-items: center; margin-bottom: 0.5rem; }
+.link-input input { flex: 1; border: 1px solid #ccc; border-radius: 4px; padding: 0.25rem 0.5rem; margin-right: 0.5rem; }
+.link-input button { background: #dc2626; color: #fff; border: none; border-radius: 4px; padding: 0.25rem 0.5rem; cursor: pointer; }
 </style>
 @endsection
 
@@ -29,81 +30,38 @@
         <p class="text-green-600 mb-4">{{ session('success') }}</p>
     @endif
 
-    <form id="ikmEditForm" action="{{ route('admin.ikm_konten.update', $ikmKonten->id) }}" method="POST" enctype="multipart/form-data">
+    {{-- Form update --}}
+    <form id="ikmEditForm" action="{{ route('admin.ikm_konten.update', ['ikm_konten' => $ikm_konten->id]) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
         {{-- Pilih IKM --}}
         <div class="mb-4">
             <label for="ikm_id" class="block font-semibold">Pilih IKM</label>
-            <select name="ikm_id" id="ikm_id" class="w-full border rounded p-2" required>
+            <select name="ikm_id" id="ikm_id" class="w-full border rounded p-2 @error('ikm_id') border-red-500 @enderror" required>
                 <option value="">-- Pilih IKM --</option>
                 @foreach($ikms as $ikm)
-                    <option value="{{ $ikm->id }}" {{ $ikmKonten->ikm_id == $ikm->id ? 'selected' : '' }}>
-                        {{ $ikm->title }}
-                    </option>
+                    <option value="{{ $ikm->id }}" {{ old('ikm_id', $ikm_konten->ikm_id) == $ikm->id ? 'selected' : '' }}>{{ $ikm->title }}</option>
                 @endforeach
             </select>
+            @error('ikm_id')
+                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+            @enderror
         </div>
 
-        {{-- Blok Konten --}}
-        <div id="blocks-container">
-            @foreach($ikmKonten->blocks as $i => $block)
-            <div class="card" data-index="{{ $i }}">
-                <div class="card-header">
-                    <h3><span class="arrow">&#9654;</span> Blok Konten #{{ $i + 1 }}</h3>
-                    <button type="button" class="text-red-600 remove-block">Hapus</button>
-                </div>
-                <div class="card-body">
-                    <label class="block font-semibold mb-1">Judul</label>
-                    <input type="text" name="blocks[{{ $i }}][title]" value="{{ $block['title'] ?? '' }}" class="w-full border rounded p-2 mb-3" required>
-
-                    <label class="block font-semibold mb-1">Konten</label>
-                    <div id="editor-text-{{ $i }}" class="ql-editor mb-2">{!! $block['text'] ?? '' !!}</div>
-                    <textarea name="blocks[{{ $i }}][text]" id="text-{{ $i }}" class="hidden">{{ $block['text'] ?? '' }}</textarea>
-
-                    {{-- Foto --}}
-                    <label class="block font-semibold mt-3 mb-1">Foto</label>
-                    <input type="file" name="blocks[{{ $i }}][photos][]" multiple class="w-full border rounded p-2">
-                    <div class="gallery mt-2">
-                        @foreach($block['photos'] ?? [] as $photo)
-                        <div class="img-wrapper">
-                            <img src="{{ Storage::url($photo) }}" alt="Foto">
-                            <span class="remove-existing" data-type="photo">&times;</span>
-                            <input type="hidden" name="blocks[{{ $i }}][old_photos][]" value="{{ $photo }}">
-                        </div>
-                        @endforeach
-                    </div>
-
-                    {{-- Video --}}
-                    <label class="block font-semibold mt-3 mb-1">Video</label>
-                    <input type="file" name="blocks[{{ $i }}][videos][]" multiple class="w-full border rounded p-2">
-                    <div class="gallery mt-2">
-                        @foreach($block['videos'] ?? [] as $video)
-                            <video src="{{ Storage::url($video) }}" controls class="mb-2"></video>
-                            <input type="hidden" name="blocks[{{ $i }}][old_videos][]" value="{{ $video }}">
-                        @endforeach
-                    </div>
-
-                    {{-- File --}}
-                    <label class="block font-semibold mt-3 mb-1">File</label>
-                    <input type="file" name="blocks[{{ $i }}][files][]" multiple class="w-full border rounded p-2">
-                    <div class="mt-2">
-                        @foreach($block['files'] ?? [] as $file)
-                            <a href="{{ Storage::url($file) }}" class="download-btn" download>{{ basename($file) }}</a>
-                            <input type="hidden" name="blocks[{{ $i }}][old_files][]" value="{{ $file }}">
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-            @endforeach
-        </div>
-
+        {{-- Container blok --}}
+        <div id="blocks-container"></div>
         <button type="button" id="add-block" class="bg-green-600 text-white px-4 py-2 rounded mb-4">Tambah Blok</button>
 
-        <div class="mt-6">
-            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Simpan</button>
-            <a href="{{ route('admin.ikm_konten.index') }}" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 ml-2">Batal</a>
+        <div>
+            <button type="submit" id="btnSubmit"
+                class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+                Simpan
+            </button>
+            <a href="{{ route('admin.ikm_konten.index') }}"
+               class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 ml-2">
+               Batal
+            </a>
         </div>
     </form>
 </div>
@@ -113,86 +71,182 @@
 <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.js"></script>
 <script>
 const toolbarOptions = [
-    [{ 'header': [1,2,3,false] }],
+    [{ 'header': [1,2,3,4,5,6,false] }],
     ['bold','italic','underline','strike'],
     [{ 'color': [] }, { 'background': [] }],
+    [{ 'font': [] }],
     [{ 'align': [] }],
     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
     ['link','image','code-block'],
     ['clean']
 ];
 
-document.addEventListener('DOMContentLoaded', () => {
-    const blocksContainer = document.getElementById('blocks-container');
+let blockIndex=0;
 
-    function initQuill(index){
-        const editorEl = document.getElementById(`editor-text-${index}`);
-        const textareaEl = document.getElementById(`text-${index}`);
-        const quill = new Quill(editorEl, { theme: 'snow', modules: { toolbar: toolbarOptions } });
-        quill.root.innerHTML = textareaEl.value;
-        quill.on('text-change', () => textareaEl.value = quill.root.innerHTML);
-        editorEl.__quill = quill; // simpan referensi
-    }
-
-    // Inisialisasi semua blok yang sudah ada
-    document.querySelectorAll('[id^="editor-text-"]').forEach((editor, idx) => initQuill(idx));
-
-    // Collapse/expand blok
-    blocksContainer.addEventListener('click', (e) => {
-        const header = e.target.closest('.card-header');
-        if (!header) return;
-        const arrow = header.querySelector('.arrow');
-        const body = header.nextElementSibling;
-        body.classList.toggle('collapsed');
-        arrow.classList.toggle('down');
+function updateBlockNumbers(){
+    document.querySelectorAll('#blocks-container .card').forEach((card,i)=>{
+        card.querySelector('.card-header h3').textContent = `Blok Konten #${i+1}`;
     });
+}
 
-    // Tambah blok baru
-    let blockIndex = blocksContainer.children.length;
-    document.getElementById('add-block').addEventListener('click', () => {
-        const html = `
-        <div class="card" data-index="${blockIndex}">
-            <div class="card-header">
-                <h3><span class="arrow">&#9654;</span> Blok Konten #${blockIndex + 1}</h3>
+function createBlock(index, data=null){
+    const container=document.getElementById('blocks-container');
+    const html=`<div class="card" data-index="${index}">
+        <div class="card-header">
+            <h3>Blok Konten #${index+1}</h3>
+            <div>
+                <span class="toggle-block mr-2">&#9660;</span>
                 <button type="button" class="text-red-600 remove-block">Hapus</button>
             </div>
-            <div class="card-body">
-                <label class="block font-semibold mb-1">Judul</label>
-                <input type="text" name="blocks[${blockIndex}][title]" class="w-full border rounded p-2 mb-3" required>
-                <label class="block font-semibold mb-1">Konten</label>
-                <div id="editor-text-${blockIndex}" class="ql-editor mb-2"></div>
-                <textarea name="blocks[${blockIndex}][text]" id="text-${blockIndex}" class="hidden"></textarea>
-                <label class="block font-semibold mt-3 mb-1">Foto</label>
-                <input type="file" name="blocks[${blockIndex}][photos][]" multiple class="w-full border rounded p-2">
-                <label class="block font-semibold mt-3 mb-1">Video</label>
-                <input type="file" name="blocks[${blockIndex}][videos][]" multiple class="w-full border rounded p-2">
-                <label class="block font-semibold mt-3 mb-1">File</label>
-                <input type="file" name="blocks[${blockIndex}][files][]" multiple class="w-full border rounded p-2">
-            </div>
-        </div>`;
-        blocksContainer.insertAdjacentHTML('beforeend', html);
-        initQuill(blockIndex);
-        blockIndex++;
+        </div>
+        <div class="card-body open">
+            <label class="block font-semibold mb-1">Judul</label>
+            <input type="text" name="blocks[${index}][title]" class="w-full border rounded p-2 mb-3" value="${data?.title ?? ''}">
+
+            <label class="block font-semibold mb-1">Konten</label>
+            <div id="editor-text-${index}" class="ql-editor mb-2">${data?.text ?? ''}</div>
+            <textarea name="blocks[${index}][text]" id="text-${index}" class="hidden"></textarea>
+
+            <label class="block font-semibold mt-3 mb-1">Foto</label>
+            <input type="file" name="blocks[${index}][photos][]" multiple accept="image/*" class="mb-2">
+            <div id="preview-photos-${index}" class="gallery mb-3"></div>
+
+            <label class="block font-semibold mt-3 mb-1">Video</label>
+            <input type="file" name="blocks[${index}][videos][]" multiple accept="video/*" class="mb-2">
+            <div id="preview-videos-${index}" class="gallery mb-3"></div>
+
+            <label class="block font-semibold mt-3 mb-1">File Lain</label>
+            <input type="file" name="blocks[${index}][files][]" multiple class="mb-2">
+            <div id="preview-files-${index}" class="gallery mb-3"></div>
+
+            <label class="block font-semibold mt-3 mb-1">Link Video</label>
+            <div id="links-container-${index}" class="mb-2"></div>
+            <button type="button" class="add-link bg-gray-200 px-3 py-1 rounded">Tambah Link</button>
+        </div>
+    </div>`;
+
+    container.insertAdjacentHTML('beforeend', html);
+    const card=container.querySelector(`.card[data-index="${index}"]`);
+    const body=card.querySelector('.card-body');
+    const toggle=card.querySelector('.toggle-block');
+
+    // Quill editor
+    new Quill(`#editor-text-${index}`, { theme:'snow', modules:{toolbar:toolbarOptions} });
+
+    // Toggle block
+    toggle.addEventListener('click', ()=>{
+        const isOpen=body.classList.contains('open');
+        if(isOpen){ body.classList.remove('open'); body.classList.add('closed'); toggle.innerHTML='&#9654;'; }
+        else{ body.classList.remove('closed'); body.classList.add('open'); toggle.innerHTML='&#9660;'; }
     });
 
-    // Hapus blok
-    blocksContainer.addEventListener('click', (e) => {
-        if(e.target.classList.contains('remove-block')){
-            e.target.closest('.card').remove();
+    // Remove block
+    card.querySelector('.remove-block').addEventListener('click', ()=>{ card.remove(); updateBlockNumbers(); });
+
+    // Handle files
+    ['photos','videos','files'].forEach(type=>{
+        const inputElem = card.querySelector(`input[name="blocks[${index}][${type}][]"]`);
+        const previewElem = document.getElementById(`preview-${type}-${index}`);
+        let filesArr = [];
+
+        // Render file lama
+        if(data && data[type]){
+            data[type].forEach(f=>{
+                const wrapper=document.createElement('div'); wrapper.className='img-wrapper old-file';
+                if(type==='photos'){ const img=document.createElement('img'); img.src=`/storage/${f}`; wrapper.appendChild(img); }
+                else if(type==='videos'){ const video=document.createElement('video'); video.src=`/storage/${f}`; video.controls=true; wrapper.appendChild(video); }
+                else{
+                    const fileBox=document.createElement('div');
+                    fileBox.style.cssText='display:flex;align-items:center;background:#f9fafb;border:1px solid #ddd;border-radius:6px;padding:6px 10px;margin-bottom:6px;';
+                    fileBox.innerHTML=`📄 <span style="margin-left:8px;">${f.split('/').pop()}</span>`;
+                    wrapper.appendChild(fileBox);
+                }
+                const btn=document.createElement('span'); btn.innerHTML='✖'; btn.title='Hapus file ini';
+                btn.onclick=()=>{ wrapper.dataset.deleted=true; wrapper.remove(); };
+                wrapper.appendChild(btn);
+                wrapper.dataset.filePath = f;
+                previewElem.appendChild(wrapper);
+            });
         }
-        if(e.target.classList.contains('remove-existing')){
-            const wrapper = e.target.closest('.img-wrapper');
-            wrapper.remove();
+
+        function renderPreview(){
+            previewElem.querySelectorAll('.new-file').forEach(el=>el.remove());
+            filesArr.forEach((file, idx)=>{
+                const wrapper=document.createElement('div'); wrapper.className='img-wrapper new-file';
+                if(type==='photos'){ const img=document.createElement('img'); img.src=URL.createObjectURL(file); img.alt=file.name; wrapper.appendChild(img); }
+                else if(type==='videos'){ const video=document.createElement('video'); video.src=URL.createObjectURL(file); video.controls=true; wrapper.appendChild(video); }
+                else{ const fileBox=document.createElement('div'); fileBox.style.cssText='display:flex;align-items:center;background:#f9fafb;border:1px solid #ddd;border-radius:6px;padding:6px 10px;margin-bottom:6px;'; fileBox.innerHTML=`📄 <span style="margin-left:8px;">${file.name}</span>`; wrapper.appendChild(fileBox); }
+                const btn=document.createElement('span'); btn.innerHTML='✖'; btn.title='Hapus file ini';
+                btn.onclick=()=>{ filesArr.splice(idx,1); renderPreview(); updateInputFiles(); };
+                wrapper.appendChild(btn);
+                previewElem.appendChild(wrapper);
+            });
         }
+
+        function updateInputFiles(){
+            const dt = new DataTransfer();
+            filesArr.forEach(f=>dt.items.add(f));
+            inputElem.files = dt.files;
+        }
+
+        inputElem.addEventListener('change', e=>{ filesArr = filesArr.concat(Array.from(e.target.files)); renderPreview(); updateInputFiles(); });
     });
 
-    // Submit form: update Quill ke textarea
-    document.getElementById('ikmEditForm').addEventListener('submit', () => {
-        document.querySelectorAll('[id^="editor-text-"]').forEach(editorEl => {
-            const textareaEl = document.getElementById(editorEl.id.replace('editor-text-', 'text-'));
-            if(editorEl && textareaEl) textareaEl.value = editorEl.__quill.root.innerHTML;
+    // Handle links
+const linksContainer=document.getElementById(`links-container-${index}`);
+function addLinkInput(val=''){
+    const div=document.createElement('div');
+    div.className='link-input';
+    div.innerHTML=`<input type="url" name="blocks[${index}][videos_link][]" placeholder="https://example.com" value="${val ?? ''}"><button type="button">✖</button>`;
+    div.querySelector('button').addEventListener('click', ()=>div.remove());
+    linksContainer.appendChild(div);
+}
+
+// Render links lama atau default kosong
+if(data && Array.isArray(data.videos_link) && data.videos_link.length){
+    data.videos_link.forEach(link=>addLinkInput(link ?? ''));
+} else {
+    addLinkInput(''); // pastikan selalu ada satu input kosong
+}
+
+}
+
+
+// Render blok lama
+@foreach($ikm_konten->blocks as $b)
+createBlock(blockIndex++, @json($b));
+@endforeach
+
+document.getElementById('add-block').addEventListener('click', ()=>createBlock(blockIndex++));
+
+document.getElementById('ikmEditForm').addEventListener('submit', ()=>{
+    document.querySelectorAll('#blocks-container .card').forEach(card=>{
+        const idx=card.dataset.index;
+        const textArea=document.getElementById(`text-${idx}`);
+        const editor=document.getElementById(`editor-text-${idx}`);
+        if(textArea && editor) textArea.value=editor.querySelector('.ql-editor').innerHTML;
+
+        // Hapus file lama yang dihapus
+        ['photos','videos','files'].forEach(type=>{
+            const previewElem = document.getElementById(`preview-${type}-${idx}`);
+            previewElem.querySelectorAll('.old-file').forEach(el=>{
+                if(el.dataset.deleted) el.remove();
+            });
+        });
+
+        // Link video: pastikan kosong jika tidak ada
+        const linksContainer = document.getElementById(`links-container-${idx}`);
+        linksContainer.querySelectorAll('input').forEach(input=>{
+            if(!input.value) input.value='';
         });
     });
+});
+
+
+document.getElementById('ikmEditForm').addEventListener('submit', function () {
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled = true;
+    btn.innerText = 'Menyimpan...';
 });
 </script>
 @endsection

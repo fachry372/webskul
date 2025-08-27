@@ -17,4 +17,9 @@ class Ikm extends Model
         'title',
         'slug',
     ];
+
+    public function konten()
+{
+    return $this->hasMany(IkmKonten::class);
+}
 }

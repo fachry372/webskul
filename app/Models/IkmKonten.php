@@ -14,38 +14,24 @@ class IkmKonten extends Model
         'text',
         'photos',
         'videos',
-        'file',
+        'files', // konsisten dengan nama kolom
     ];
 
     protected $casts = [
         'photos' => 'array',
         'videos' => 'array',
-        'file'   => 'array', // tambahkan cast array
+        'files'  => 'array',
     ];
 
-    public function getBlocksAttribute()
-{
-    return [
-        [
-            'title' => $this->title,
-            'text'  => $this->text,
-            'photos'=> $this->photos ?? [],
-            'videos'=> $this->videos ?? [],
-            'files' => $this->file ?? [], // sesuai Blade
-        ]
-    ];
-}
-
-
-
+    // Relasi ke IKM
     public function ikm()
     {
-        return $this->belongsTo(Ikm::class, 'ikm_id');
+        return $this->belongsTo(Ikm::class);
     }
 
+    // Relasi ke blok konten
     public function blocks()
-{
-    return $this->hasMany(IkmKontenBlock::class);
-}
-
+    {
+        return $this->hasMany(IkmKontenBlock::class, 'ikm_konten_id');
+    }
 }

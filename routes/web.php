@@ -78,7 +78,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 use App\Http\Controllers\PublicIkmController;
 
-Route::get('/ikm/{slug}', [PublicIkmController::class, 'showByIkm'])->name('ikm.show');
+Route::get('/ikm/{slug}', [PublicIkmController::class, 'show'])->name('ikm.show');
+
 
 
 require __DIR__.'/auth.php';

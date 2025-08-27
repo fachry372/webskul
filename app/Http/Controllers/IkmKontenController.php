@@ -6,6 +6,7 @@ use App\Models\IkmKonten;
 use App\Models\Ikm;
 use App\Models\IkmKontenBlock;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class IkmKontenController extends Controller
@@ -18,62 +19,68 @@ class IkmKontenController extends Controller
 
     public function create()
     {
-        $ikms = Ikm::all();
+        // Ambil hanya IKM yang belum punya konten
+        $ikms = Ikm::doesntHave('konten')->get();
         return view('admin.ikm_konten.create', compact('ikms'));
     }
 
+
     public function store(Request $request)
-    {
-        $request->validate([
-            'ikm_id' => 'required|exists:ikms,id',
-            'blocks' => 'required|array|min:1',
-            'blocks.*.title' => 'required|string|max:255',
-            'blocks.*.text' => 'nullable|string',
-            'blocks.*.photos.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'blocks.*.videos.*' => 'nullable|mimetypes:video/mp4,video/avi,video/mpeg|max:10240',
-            'blocks.*.files.*' => 'nullable|mimes:pdf,doc,docx,xls,xlsx|max:5120',
+{
+    $request->validate([
+        'ikm_id' => 'required|exists:ikms,id|unique:ikm_konten,ikm_id',
+        'blocks' => 'required|array|min:1',
+        'blocks.*.title' => 'nullable|string|',
+        'blocks.*.text' => 'nullable|string',
+        'blocks.*.photos.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        'blocks.*.videos.*' => 'nullable|mimetypes:video/mp4,video/avi,video/mpeg|max:10240',
+        'blocks.*.videos_link.*' => 'nullable|url',
+        'blocks.*.files.*' => 'nullable|mimes:pdf,doc,docx,xls,xlsx|max:5120',
+    ]);
+
+    DB::transaction(function() use ($request) {
+        $konten = IkmKonten::create([
+            'ikm_id' => $request->ikm_id,
         ]);
 
-        DB::transaction(function() use ($request) {
-            // Buat konten induk
-            $konten = IkmKonten::create([
-                'ikm_id' => $request->ikm_id,
-            ]);
-
-            foreach ($request->blocks as $block) {
-                $photos = [];
-                if (!empty($block['photos'])) {
-                    foreach ($block['photos'] as $photo) {
-                        $photos[] = $photo->store('ikm/photos', 'public');
-                    }
+        foreach ($request->blocks as $block) {
+            $photos = [];
+            if (!empty($block['photos'])) {
+                foreach ($block['photos'] as $photo) {
+                    $photos[] = $photo->store('ikm/photos', 'public');
                 }
-
-                $videos = [];
-                if (!empty($block['videos'])) {
-                    foreach ($block['videos'] as $video) {
-                        $videos[] = $video->store('ikm/videos', 'public');
-                    }
-                }
-
-                $files = [];
-                if (!empty($block['files'])) {
-                    foreach ($block['files'] as $file) {
-                        $files[] = $file->store('ikm/files', 'public');
-                    }
-                }
-
-                $konten->blocks()->create([
-                    'title' => $block['title'],
-                    'text'  => $block['text'] ?? null,
-                    'photos'=> $photos,
-                    'videos'=> $videos,
-                    'files' => $files,
-                ]);
             }
-        });
 
-        return redirect()->route('admin.ikm_konten.index')->with('success', 'Konten berhasil ditambahkan.');
-    }
+            $videos = [];
+            if (!empty($block['videos'])) {
+                foreach ($block['videos'] as $video) {
+                    $videos[] = $video->store('ikm/videos', 'public');
+                }
+            }
+
+            $files = [];
+            if (!empty($block['files'])) {
+                foreach ($block['files'] as $file) {
+                    $files[] = $file->store('ikm/files', 'public');
+                }
+            }
+
+            $konten->blocks()->create([
+                'title'       => $block['title'],
+                'text'        => $block['text'] ?? null,
+                'photos'      => $photos,
+                'videos'      => $videos,
+                'videos_link' => !empty($block['videos_link'])
+                ? array_map('convertVideoLink', $block['videos_link'])
+                : null,
+                'files'       => $files,
+            ]);
+        }
+    });
+
+    return redirect()->route('admin.ikm_konten.index')
+        ->with('success', 'Konten berhasil ditambahkan.');
+}
 
     public function show(IkmKonten $ikmKonten)
     {
@@ -81,98 +88,121 @@ class IkmKontenController extends Controller
     }
 
 
-public function edit(IkmKonten $ikmKonten)
-{
-    $ikms = Ikm::all(); // list IKM untuk select
-    return view('admin.ikm_konten.edit', compact('ikmKonten', 'ikms'));
-}
+    public function edit(IkmKonten $ikm_konten)
+    {
+        $ikm_konten->load('blocks');
 
-public function update(Request $request, IkmKonten $ikmKonten)
+        $ikms = Ikm::doesntHave('konten')
+            ->orWhere('id', $ikm_konten->ikm_id)
+            ->get();
+
+        return view('admin.ikm_konten.edit', compact('ikm_konten', 'ikms'));
+    }
+
+
+    public function update(Request $request, IkmKonten $ikm_konten)
 {
     $request->validate([
-        'ikm_id' => 'required|exists:ikms,id',
+        'ikm_id' => 'required|exists:ikms,id|unique:ikm_konten,ikm_id,' . $ikm_konten->id,
         'blocks' => 'required|array|min:1',
-        'blocks.*.title' => 'required|string|max:255',
+        'blocks.*.title' => 'nullable|string',
         'blocks.*.text' => 'nullable|string',
         'blocks.*.photos.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         'blocks.*.videos.*' => 'nullable|mimetypes:video/mp4,video/avi,video/mpeg|max:10240',
+        'blocks.*.videos_link.*' => 'nullable|url',
         'blocks.*.files.*' => 'nullable|mimes:pdf,doc,docx,xls,xlsx|max:5120',
     ]);
 
-    DB::transaction(function() use ($request, $ikmKonten) {
-        // Update konten induk
-        $ikmKonten->update([
+    DB::transaction(function() use ($request, $ikm_konten) {
+        $ikm_konten->update([
             'ikm_id' => $request->ikm_id,
         ]);
 
-        // Hapus blok yang lama (atau bisa pilih logika update per blok id jika ada)
-        foreach ($ikmKonten->blocks as $oldBlock) {
-            // Hapus file lama
-            foreach (['photos','videos','files'] as $type) {
-                if ($oldBlock->$type) {
-                    foreach ($oldBlock->$type as $file) {
-                        Storage::disk('public')->delete($file);
-                    }
-                }
-            }
-            $oldBlock->delete();
-        }
+        foreach ($request->blocks as $idx => $block) {
+            $oldBlock = $ikm_konten->blocks()->find($block['id'] ?? null);
 
-        // Simpan blok baru
-        foreach ($request->blocks as $block) {
-            $photos = $block['old_photos'] ?? [];
+            $photos = $oldBlock->photos ?? [];
+            $videos = $oldBlock->videos ?? [];
+            $files  = $oldBlock->files  ?? [];
+
             if (!empty($block['photos'])) {
                 foreach ($block['photos'] as $photo) {
                     $photos[] = $photo->store('ikm/photos', 'public');
                 }
             }
 
-            $videos = $block['old_videos'] ?? [];
             if (!empty($block['videos'])) {
                 foreach ($block['videos'] as $video) {
                     $videos[] = $video->store('ikm/videos', 'public');
                 }
             }
 
-            $files = $block['old_files'] ?? [];
             if (!empty($block['files'])) {
                 foreach ($block['files'] as $file) {
                     $files[] = $file->store('ikm/files', 'public');
                 }
             }
 
-            $ikmKonten->blocks()->create([
-                'title' => $block['title'],
-                'text'  => $block['text'] ?? null,
-                'photos'=> $photos,
-                'videos'=> $videos,
-                'files' => $files,
-            ]);
+            $videos_link = !empty($block['videos_link'])
+                ? array_map('convertVideoLink', $block['videos_link'])
+                : ($oldBlock->videos_link ?? null);
+
+            if($oldBlock){
+                $oldBlock->update([
+                    'title'       => $block['title'] ?? $oldBlock->title,
+                    'text'        => $block['text'] ?? $oldBlock->text,
+                    'photos'      => $photos,
+                    'videos'      => $videos,
+                    'videos_link' => $videos_link,
+                    'files'       => $files,
+                ]);
+            } else {
+                $ikm_konten->blocks()->create([
+                    'title'       => $block['title'] ?? null,
+                    'text'        => $block['text'] ?? null,
+                    'photos'      => $photos,
+                    'videos'      => $videos,
+                    'videos_link' => $videos_link,
+                    'files'       => $files,
+                ]);
+            }
         }
     });
 
-    return redirect()->route('admin.ikm_konten.index')->with('success', 'Konten berhasil diperbarui.');
+    return redirect()->route('admin.ikm_konten.index')
+        ->with('success', 'Konten berhasil diperbarui.');
 }
 
-public function destroy(IkmKonten $ikmKonten)
+
+
+
+
+// public function destroy($id)
+// {
+//     $konten = IkmKonten::findOrFail($id);
+//     $konten->delete();
+
+//     return redirect()->route('admin.ikm_konten.index')
+//         ->with('success', 'Data berhasil dihapus');
+// }
+
+public function destroy($id)
 {
-    foreach ($ikmKonten->blocks as $block) {
-        foreach (['photos','videos','files'] as $type) {
-            if (!empty($block->$type)) {
-                foreach ($block->$type as $file) {
-                    Storage::disk('public')->delete($file);
-                }
-            }
-        }
+    $konten = IkmKonten::findOrFail($id);
+
+    // Hapus blok terkait
+    foreach ($konten->blocks as $block) {
+        foreach ($block->photos ?? [] as $p) Storage::disk('public')->delete($p);
+        foreach ($block->videos ?? [] as $v) Storage::disk('public')->delete($v);
+        foreach ($block->files ?? [] as $f) Storage::disk('public')->delete($f);
     }
+    $konten->blocks()->delete();
 
-    $ikmKonten->blocks()->delete();
-    $ikmKonten->delete();
+    $konten->delete();
 
-    return redirect()->route('admin.ikm_konten.index')->with('success', 'Konten berhasil dihapus.');
+    return redirect()->route('admin.ikm_konten.index')
+        ->with('success', 'Data berhasil dihapus');
 }
-
-
 
 
 }

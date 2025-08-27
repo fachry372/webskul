@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Profile;
 use Illuminate\Support\Str;
 
-class PublicProfileController extends Controller
+class ProfilePageController extends Controller
 {
     /**
      * Tampilkan halaman profil berdasarkan slug.

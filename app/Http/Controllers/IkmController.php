@@ -59,12 +59,18 @@ class IkmController extends Controller
             ->with('success', 'Judul IKM berhasil diperbarui');
     }
 
-    // Hapus IKM
-    public function destroy(Ikm $ikm)
-    {
-        $ikm->delete();
-
+ // Hapus IKM
+public function destroy(Ikm $ikm)
+{
+    if ($ikm->konten()->exists()) {
         return redirect()->route('admin.ikm.index')
-            ->with('success', 'Judul IKM berhasil dihapus');
+            ->with('error', 'Tidak bisa menghapus IKM karena masih memiliki konten.');
     }
+
+    $ikm->delete();
+
+    return redirect()->route('admin.ikm.index')
+        ->with('success', 'Judul IKM berhasil dihapus');
+}
+
 }

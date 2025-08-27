@@ -4,48 +4,34 @@ namespace App\Http\Controllers;
 
 use App\Models\Ikm;
 use App\Models\IkmKonten;
+use App\Models\IkmKontenBlock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PublicIkmController extends Controller
 {
-    /**
-     * Tampilkan detail IKM berdasarkan slug.
-     */
-    public function showByIkm($slug)
+    public function show($slug)
     {
-        // Ambil data IKM berdasarkan slug
+        // Ambil IKM berdasarkan slug
         $ikm = Ikm::where('slug', $slug)->firstOrFail();
 
-        // Ambil semua konten yang terkait dengan IKM ini
-        $konten = IkmKonten::where('ikm_id', $ikm->id)->latest()->get();
+        // Ambil semua konten terkait IKM beserta blocks
+        $kontens = IkmKonten::with('blocks')
+            ->where('ikm_id', $ikm->id)
+            ->latest()
+            ->get();
 
-        // Siapkan menu IKM untuk navbar
+        // Ambil semua IKM untuk navbar/menu
         $ikms = Ikm::all();
-        $ikmMenus = $ikms->mapWithKeys(function ($i) {
-            return [$i->title ?? $i->name => route('ikm.show', Str::slug($i->slug ?? $i->title))];
-        })->toArray();
 
-        // Sections default (jika mau loop di view universal)
-        $sections = [
-            'content', 'content_section_photos', 'content_section_photos_text', 'content_section_files'
-        ];
-
-        // Gunakan Blade universal
-        return view('public.ikm.show', compact('ikm', 'konten', 'sections', 'ikmMenus'));
+        return view('public.ikm.show', compact('ikm', 'kontens', 'ikms'));
     }
-
-    /**
-     * Ambil menu IKM untuk navbar
-     */
     public function getIkmMenu()
     {
         $ikms = Ikm::all();
-
         $ikmMenus = $ikms->mapWithKeys(function ($i) {
-            return [$i->title ?? $i->name => route('ikm.show', Str::slug($i->slug ?? $i->title))];
+            return [$i->title ?? $i->name => route('ikm.show', $i->slug)];
         })->toArray();
-
         return $ikmMenus;
     }
 }
