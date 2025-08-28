@@ -175,6 +175,12 @@
                         </button>
                     </li>
                     <li class="py-4 border-b border-white/30">
+                        <button onclick="openSubmenu('ikm')" class="w-full text-left hover:text-green-400">
+                            Implementasi IKM <i class="fas fa-chevron-right float-right"></i>
+                        </button>
+                    </li>
+
+                    <li class="py-4 border-b border-white/30">
                         <a href="#" class="hover:text-green-400">Galeri</a>
                     </li>
                     <li class="py-4 border-b border-white/30">
@@ -189,16 +195,16 @@
             </div>
         </div>
 
-       <!-- SUBMENU: PROFIL -->
+ <!-- SUBMENU: PROFIL -->
 <div id="submenu-profil" class="absolute right-0 w-3/4 h-full bg-[#1a1a1a] text-white transform translate-x-full transition-transform duration-300 top-0 p-6 z-20">
     <div class="flex items-center mb-6">
         <button onclick="closeSubmenu('profil')" class="flex items-center gap-2 text-white/80">
             <i class="fas fa-arrow-left text-xl"></i> <span>Kembali</span>
         </button>
     </div>
-    <ul class="font-semibold text-base text-white/80 divide-y divide-white/30">
+    <ul class="font-semibold text-base text-white/80">
         @foreach ($dropdowns['Profil'] as $item => $url)
-            <li class="py-4">
+            <li class="py-4 border-b border-white/30">
                 <a href="{{ $url }}" class="block hover:text-green-400">{{ $item }}</a>
             </li>
         @endforeach
@@ -212,14 +218,31 @@
             <i class="fas fa-arrow-left text-xl"></i> <span>Kembali</span>
         </button>
     </div>
-    <ul class="font-semibold text-base text-white/80 divide-y divide-white/30">
+    <ul class="font-semibold text-base text-white/80">
         @foreach ($dropdowns['Kompetensi Keahlian'] as $item => $url)
-            <li class="py-4">
+            <li class="py-4 border-b border-white/30">
                 <a href="{{ $url }}" class="block hover:text-green-400">{{ $item }}</a>
             </li>
         @endforeach
     </ul>
 </div>
+
+<!-- SUBMENU: IKM -->
+<div id="submenu-ikm" class="absolute right-0 w-3/4 h-full bg-[#1a1a1a] text-white transform translate-x-full transition-transform duration-300 top-0 p-6 z-20">
+    <div class="flex items-center mb-6">
+        <button onclick="closeSubmenu('ikm')" class="flex items-center gap-2 text-white/80">
+            <i class="fas fa-arrow-left text-xl"></i> <span>Kembali</span>
+        </button>
+    </div>
+    <ul class="font-semibold text-base text-white/80">
+        @foreach ($dropdowns['Implementasi IKM'] as $item => $url)
+            <li class="py-4 border-b border-white/30">
+                <a href="{{ $url }}" class="block hover:text-green-400">{{ $item }}</a>
+            </li>
+        @endforeach
+    </ul>
+</div>
+
 
 
         <!-- SUBMENU: LAINNYA -->

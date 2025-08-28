@@ -100,8 +100,12 @@ function createBlock(index, data=null){
             </div>
         </div>
         <div class="card-body open">
+
+            ${data?.id ? `<input type="hidden" name="blocks[${index}][id]" value="${data.id}">` : ''}
+
             <label class="block font-semibold mb-1">Judul</label>
-            <input type="text" name="blocks[${index}][title]" class="w-full border rounded p-2 mb-3" value="${data?.title ?? ''}">
+            <input type="text" name="blocks[${index}][title]" class="w-full border rounded p-2 mb-3"
+                   value="${data?.title ?? ''}">
 
             <label class="block font-semibold mb-1">Konten</label>
             <div id="editor-text-${index}" class="ql-editor mb-2">${data?.text ?? ''}</div>
@@ -141,9 +145,21 @@ function createBlock(index, data=null){
     });
 
     // Remove block
-    card.querySelector('.remove-block').addEventListener('click', ()=>{ card.remove(); updateBlockNumbers(); });
+    card.querySelector('.remove-block').addEventListener('click', ()=>{
+        if(data?.id){
+            card.style.display='none';
+            const delInput=document.createElement('input');
+            delInput.type='hidden';
+            delInput.name=`blocks[${index}][_delete]`;
+            delInput.value='1';
+            card.appendChild(delInput);
+        } else {
+            card.remove();
+        }
+        updateBlockNumbers();
+    });
 
-    // Handle files
+    // File preview
     ['photos','videos','files'].forEach(type=>{
         const inputElem = card.querySelector(`input[name="blocks[${index}][${type}][]"]`);
         const previewElem = document.getElementById(`preview-${type}-${index}`);
@@ -162,7 +178,15 @@ function createBlock(index, data=null){
                     wrapper.appendChild(fileBox);
                 }
                 const btn=document.createElement('span'); btn.innerHTML='✖'; btn.title='Hapus file ini';
-                btn.onclick=()=>{ wrapper.dataset.deleted=true; wrapper.remove(); };
+                btn.onclick=()=>{
+                    wrapper.dataset.deleted=true;
+                    const delInput=document.createElement('input');
+                    delInput.type='hidden';
+                    delInput.name=`blocks[${index}][_delete_files][]`;
+                    delInput.value=f;
+                    card.appendChild(delInput);
+                    wrapper.remove();
+                };
                 wrapper.appendChild(btn);
                 wrapper.dataset.filePath = f;
                 previewElem.appendChild(wrapper);
@@ -192,24 +216,28 @@ function createBlock(index, data=null){
         inputElem.addEventListener('change', e=>{ filesArr = filesArr.concat(Array.from(e.target.files)); renderPreview(); updateInputFiles(); });
     });
 
-    // Handle links
-const linksContainer=document.getElementById(`links-container-${index}`);
-function addLinkInput(val=''){
-    const div=document.createElement('div');
-    div.className='link-input';
-    div.innerHTML=`<input type="url" name="blocks[${index}][videos_link][]" placeholder="https://example.com" value="${val ?? ''}"><button type="button">✖</button>`;
-    div.querySelector('button').addEventListener('click', ()=>div.remove());
-    linksContainer.appendChild(div);
+    // Link video
+    const linksContainer=document.getElementById(`links-container-${index}`);
+    function addLinkInput(val=''){
+        const div=document.createElement('div');
+        div.className='link-input';
+        div.innerHTML=`<input type="url" name="blocks[${index}][videos_link][]" placeholder="https://example.com" value="${val ?? ''}"><button type="button">✖</button>`;
+        div.querySelector('button').addEventListener('click', ()=>div.remove());
+        linksContainer.appendChild(div);
+    }
+
+    // Render link lama
+    if(data && Array.isArray(data.videos_link) && data.videos_link.length){
+        data.videos_link.forEach(link=>addLinkInput(link ?? ''));
+    } else {
+        addLinkInput('');
+    }
+
+    // Tombol tambah link
+    card.querySelector('.add-link').addEventListener('click', ()=> addLinkInput(''));
 }
 
-// Render links lama atau default kosong
-if(data && Array.isArray(data.videos_link) && data.videos_link.length){
-    data.videos_link.forEach(link=>addLinkInput(link ?? ''));
-} else {
-    addLinkInput(''); // pastikan selalu ada satu input kosong
-}
 
-}
 
 
 // Render blok lama

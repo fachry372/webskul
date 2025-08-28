@@ -84,21 +84,15 @@ if (!function_exists('renderPhotos')) {
 
 
 
-
     if (!function_exists('convertVideoLink')) {
         function convertVideoLink($url)
         {
-            // pastikan input string
-            if (!is_string($url)) {
-                return null;
-            }
+            if (!is_string($url)) return null;
 
-            // YouTube watch?v=
+            // YouTube
             if (preg_match('/youtube\.com\/watch\?v=([^\&\?\/]+)/', $url, $id)) {
                 return 'https://www.youtube.com/embed/' . $id[1];
             }
-
-            // YouTube short youtu.be
             if (preg_match('/youtu\.be\/([^\&\?\/]+)/', $url, $id)) {
                 return 'https://www.youtube.com/embed/' . $id[1];
             }
@@ -108,11 +102,32 @@ if (!function_exists('renderPhotos')) {
                 return 'https://player.vimeo.com/video/' . $id[1];
             }
 
-            // Default → kembalikan original url
+            // Google Drive
+            if (preg_match('/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/', $url, $id)) {
+                return 'https://drive.google.com/file/d/' . $id[1] . '/preview';
+            }
+            if (preg_match('/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/', $url, $id)) {
+                return 'https://drive.google.com/file/d/' . $id[1] . '/preview';
+            }
+
+            // TikTok
+            if (preg_match('/tiktok\.com\/@[\w\.-]+\/video\/(\d+)/', $url, $id)) {
+                return 'https://www.tiktok.com/embed/' . $id[1];
+            }
+
+            // Instagram
+            if (preg_match('/instagram\.com\/(p|reel)\/([a-zA-Z0-9_-]+)/', $url, $id)) {
+                return 'https://www.instagram.com/' . $id[1] . '/' . $id[2] . '/embed';
+            }
+
+            // Facebook
+            if (preg_match('/facebook\.com\/.*\/videos\/(\d+)/', $url, $id)) {
+                return 'https://www.facebook.com/plugins/video.php?href=' . urlencode($url) . '&show_text=0&width=560';
+            }
+
             return $url;
         }
     }
-
 
 
 }
