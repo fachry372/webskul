@@ -6,56 +6,56 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
          .content-html {
-        max-width: 100%;
-        color: #4a5568;
-        line-height: 1.7;
-        font-family: sans-serif;
-    }
-    .content-html h1 { font-size: 2rem; font-weight: bold; margin-bottom: 1rem; }
-    .content-html h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 0.75rem; }
-    .content-html h3 { font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5rem; }
-    .content-html h4 { font-size: 1.125rem; font-weight: bold; margin-bottom: 0.5rem; }
-    .content-html h5 { font-size: 1rem; font-weight: bold; margin-bottom: 0.5rem; }
-    .content-html h6 { font-size: 0.875rem; font-weight: bold; margin-bottom: 0.5rem; }
-    .content-html p { margin-bottom: 1rem; }
-    .content-html strong, .content-html b { font-weight: bold; }
-    .content-html em, .content-html i { font-style: italic; }
-    .content-html u { text-decoration: underline; }
-    .content-html s, .content-html strike { text-decoration: line-through; }
-    .content-html code { font-family: monospace; background-color: #f3f4f6; padding: 2px 4px; border-radius: 3px; }
-    .content-html .ql-font-monospace { font-family: monospace; }
-    .content-html .ql-font-serif { font-family: serif; }
-    .content-html .ql-font-sans { font-family: sans-serif; }
-    .content-html .ql-size-small { font-size: 0.75rem; }
-    .content-html .ql-size-large { font-size: 1.25rem; }
-    .content-html .ql-size-huge { font-size: 1.5rem; }
-    .content-html .ql-size-normal { font-size: 1rem; }
-    .content-html .ql-align-left { text-align: left; }
-    .content-html .ql-align-center { text-align: center; }
-    .content-html .ql-align-right { text-align: right; }
-    .content-html .ql-align-justify { text-align: justify; }
-    .content-html ul, .content-html ol { padding-left: 2rem; margin: 1rem 0; }
-    .content-html ul { list-style-type: disc; }
-    .content-html ol { list-style-type: decimal; }
-    .content-html li { margin-bottom: 0.5rem; }
-    .content-html blockquote {
-        border-left: 4px solid #ccc;
-        padding-left: 1rem;
-        color: #555;
-        font-style: italic;
-        margin: 1rem 0;
-    }
-    .content-html a { color: #1d4ed8; text-decoration: underline; }
-    .content-html a:hover { color: #2563eb; }
-    .content-html img {
-        max-width: 100%;
-        height: auto;
-        border: 1px solid #e5e7eb;
-        border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin: 1rem auto;
-        display: block;
-    }
+            max-width: 100%;
+            color: #4a5568;
+            line-height: 1.7;
+            font-family: sans-serif;
+        }
+        .content-html h1 { font-size: 2rem; font-weight: bold; margin-bottom: 1rem; }
+        .content-html h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 0.75rem; }
+        .content-html h3 { font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5rem; }
+        .content-html h4 { font-size: 1.125rem; font-weight: bold; margin-bottom: 0.5rem; }
+        .content-html h5 { font-size: 1rem; font-weight: bold; margin-bottom: 0.5rem; }
+        .content-html h6 { font-size: 0.875rem; font-weight: bold; margin-bottom: 0.5rem; }
+        .content-html p { margin-bottom: 1rem; }
+        .content-html strong, .content-html b { font-weight: bold; }
+        .content-html em, .content-html i { font-style: italic; }
+        .content-html u { text-decoration: underline; }
+        .content-html s, .content-html strike { text-decoration: line-through; }
+        .content-html code { font-family: monospace; background-color: #f3f4f6; padding: 2px 4px; border-radius: 3px; }
+        .content-html .ql-font-monospace { font-family: monospace; }
+        .content-html .ql-font-serif { font-family: serif; }
+        .content-html .ql-font-sans { font-family: sans-serif; }
+        .content-html .ql-size-small { font-size: 0.75rem; }
+        .content-html .ql-size-large { font-size: 1.25rem; }
+        .content-html .ql-size-huge { font-size: 1.5rem; }
+        .content-html .ql-size-normal { font-size: 1rem; }
+        .content-html .ql-align-left { text-align: left; }
+        .content-html .ql-align-center { text-align: center; }
+        .content-html .ql-align-right { text-align: right; }
+        .content-html .ql-align-justify { text-align: justify; }
+        .content-html ul, .content-html ol { padding-left: 2rem; margin: 1rem 0; }
+        .content-html ul { list-style-type: disc; }
+        .content-html ol { list-style-type: decimal; }
+        .content-html li { margin-bottom: 0.5rem; }
+        .content-html blockquote {
+            border-left: 4px solid #ccc;
+            padding-left: 1rem;
+            color: #555;
+            font-style: italic;
+            margin: 1rem 0;
+        }
+        .content-html a { color: #1d4ed8; text-decoration: underline; }
+        .content-html a:hover { color: #2563eb; }
+        .content-html img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 1rem auto;
+            display: block;
+        }
 
         .gallery-image {
             width: 100%;
@@ -64,7 +64,6 @@
             border-radius: 6px;
             transition: transform 0.3s ease;
         }
-
         .gallery-image:hover {
             transform: scale(1.05);
         }
@@ -78,7 +77,6 @@
             text-decoration: none;
             margin-top: 0.5rem;
         }
-
         .download-btn:hover {
             background-color: #2563eb;
         }
@@ -129,14 +127,12 @@
 
         @forelse($kontens as $konten)
             @php
-                // filter block kosong
                 $validBlocks = collect($konten->blocks)->filter(function ($block) {
                     $isValidArray = function ($arr) {
                         return is_array($arr) && collect($arr)->filter(function ($v) {
                             return !is_null($v) && $v !== '';
                         })->isNotEmpty();
                     };
-
                     return $block->title
                         || $block->text
                         || $isValidArray($block->photos ?? [])
@@ -173,19 +169,22 @@
                         </div>
                     @endif
 
-                    {{-- Video --}}
-                    @if (!empty($block->videos) && is_array($block->videos))
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                            @foreach ($block->videos as $video)
-                                @if ($video)
-                                    <div>
-                                        <video src="{{ Storage::url($video) }}" controls class="w-full rounded-lg shadow"></video>
-                                        <a href="{{ Storage::url($video) }}" class="download-btn" download>Download Video</a>
-                                    </div>
-                                @endif
-                            @endforeach
-                        </div>
-                    @endif
+                  {{-- Video --}}
+@if (!empty($block->videos) && is_array($block->videos))
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+    @foreach ($block->videos as $video)
+        @if ($video)
+            <div class="aspect-video w-full">
+                <video src="{{ Storage::url($video) }}"
+                       controls
+                       class="w-full h-full object-cover rounded-lg shadow"></video>
+                <a href="{{ Storage::url($video) }}" class="download-btn block text-center">Download Video</a>
+            </div>
+        @endif
+    @endforeach
+</div>
+@endif
+
 
                     {{-- Video Link --}}
                     @if (!empty($block->videos_link) && is_array($block->videos_link))
@@ -209,23 +208,39 @@
                                         $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
                                     @endphp
 
+                                    {{-- PDF --}}
                                     @if ($ext === 'pdf')
                                         <div class="overflow-x-auto mb-4">
                                             <iframe src="{{ $url }}" class="file-viewer"></iframe>
                                         </div>
                                         <a href="{{ $url }}" class="download-btn" download>Download PDF</a>
+
+                                    {{-- Gambar --}}
                                     @elseif(in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']))
                                         <img src="{{ $url }}" alt="File Gambar" class="gallery-image">
                                         <a href="{{ $url }}" class="download-btn" download>Download Gambar</a>
+
+                                    {{-- Video --}}
                                     @elseif(in_array($ext, ['mp4', 'webm']))
                                         <video src="{{ $url }}" controls class="w-full rounded-lg shadow"></video>
                                         <a href="{{ $url }}" class="download-btn" download>Download Video</a>
+
+                                    {{-- Office (Word, Excel, PowerPoint) --}}
                                     @elseif(in_array($ext, ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx']))
-                                        <iframe src="https://docs.google.com/viewer?url={{ urlencode($url) }}&embedded=true"
-                                            class="file-viewer"
-                                            onerror="this.style.display='none'; this.insertAdjacentHTML('afterend','<div class=&quot;fallback&quot;>Pratinjau tidak tersedia, silakan download file.</div>');"></iframe>
+                                        <div class="fallback">
+                                            <p><strong>Pratinjau tidak tersedia.</strong></p>
+                                            <p>File Office (Word, Excel, PowerPoint) tidak bisa dipratinjau langsung di halaman ini.
+                                               Silakan <b>download file</b> untuk melihat isinya.</p>
+                                        </div>
                                         <a href="{{ $url }}" class="download-btn" download>Download File Office</a>
+
+                                    {{-- File lain --}}
                                     @else
+                                        <div class="fallback">
+                                            <p><strong>Pratinjau tidak tersedia.</strong></p>
+                                            <p>Jenis file ini tidak didukung untuk ditampilkan langsung.
+                                               Silakan <b>download file</b> untuk membukanya di perangkat Anda.</p>
+                                        </div>
                                         <a href="{{ $url }}" class="download-btn" target="_blank">Download File</a>
                                     @endif
                                 @endif
@@ -235,7 +250,6 @@
 
                 </div>
 
-                {{-- HR hanya kalau ada block valid berikutnya --}}
                 @if (isset($validBlocks[$index + 1]))
                     <hr class="my-6 border-gray-300">
                 @endif
