@@ -147,15 +147,16 @@ iframe.file-viewer { width: 100%; height: 75vh; max-height: 600px; border: 1px s
                 @endif
 
                 @if($portraitLinks->isNotEmpty())
-                    <h3 class="text-xl font-semibold mt-6 mb-2">Instagram / TikTok Videos</h3>
-                    <div class="grid gap-6 justify-items-center @if($portraitLinks->count()>=2) md:grid-cols-2 @endif">
-                        @foreach($portraitLinks as $link)
-                            <div class="video-embed-wrapper aspect-9-16 w-full">
-                                <iframe src="{{ convertVideoLink($link) }}" allowfullscreen></iframe>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
+                <h3 class="text-xl font-semibold mt-6 mb-2">Instagram / TikTok Videos</h3>
+                <div class="grid gap-6 justify-items-center md:grid-cols-3">
+                    @foreach($portraitLinks as $link)
+                        <div class="video-embed-wrapper aspect-9-16 w-full">
+                            <iframe src="{{ convertVideoLink($link) }}" allowfullscreen></iframe>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
             @endif
 
             {{-- Files --}}
