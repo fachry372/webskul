@@ -103,9 +103,20 @@
 @endforeach
 
             <!-- Galeri & Kelulusan -->
-            <li><a href="#"
-                    class="{{ request()->routeIs('galeri') ? 'text-green-500 border-b-2 border-green-500' : 'hover:text-green-500 hover:border-b-2 hover:border-green-500' }} pb-1">Galeri</a>
-            </li>
+            @php
+            $firstGaleri = \App\Models\Galeri::first(); // ambil galeri pertama dari DB
+        @endphp
+
+        <li>
+            <a href="{{ $firstGaleri ? route('galeri.show', ['slug' => $firstGaleri->slug]) : '#' }}"
+               class="{{ request()->routeIs('galeri.show') ? 'text-green-500 border-b-2 border-green-500' : 'hover:text-green-500 hover:border-b-2 hover:border-green-500' }} pb-1">
+               Galeri
+            </a>
+        </li>
+
+
+
+
             <li><a href="#"
                     class="{{ request()->routeIs('kelulusan') ? 'text-green-500 border-b-2 border-green-500' : 'hover:text-green-500 hover:border-b-2 hover:border-green-500' }} pb-1">Kelulusan</a>
             </li>

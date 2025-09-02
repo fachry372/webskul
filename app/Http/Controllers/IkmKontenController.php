@@ -27,7 +27,7 @@ class IkmKontenController extends Controller
 
     public function store(Request $request)
 {
-   
+
     $request->validate([
         'ikm_id' => 'required|exists:ikms,id|unique:ikm_konten,ikm_id',
         'blocks' => 'required|array|min:1',
@@ -110,7 +110,8 @@ class IkmKontenController extends Controller
             'blocks.*.title' => 'nullable|string',
             'blocks.*.text' => 'nullable|string',
             'blocks.*.photos.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-           'blocks.*.videos.*' => 'nullable|mimetypes:video/mp4,video/avi,video/mpeg|max:1048576',
+          'blocks.*.videos.*' => 'nullable|mimes:mp4,avi,mpeg,mov,webm,quicktime|max:1048576',
+
 
             'blocks.*.videos_link.*' => 'nullable|url',
             'blocks.*.files.*' => 'nullable|mimes:pdf,doc,docx,xls,xlsx|max:5120',

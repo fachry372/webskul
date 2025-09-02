@@ -11,6 +11,8 @@ use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\IkmController;
 use App\Http\Controllers\IkmKontenController;
 use App\Http\Controllers\PublicIkmController;
+use App\Http\Controllers\GaleriController;
+use App\Http\Controllers\PublicGaleriController;
 
 Route::get('/', [BerandaController::class, 'index'])->name('beranda');
 Route::get('/beranda', [BerandaController::class, 'index']);
@@ -58,6 +60,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::resource('ikm_konten', IkmKontenController::class);
         Route::delete('/admin/ikm_konten/block/{block}', [IkmKontenController::class, 'destroy'])
             ->name('admin.ikm_konten.block.destroy');
+
+
+// CRUD Galeri (tanpa prefix admin)
+Route::resource('galeri', GaleriController::class)->names('galeri');
     });
 });
 
@@ -65,6 +71,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 Route::get('/jurusan/{slug}', [PublicJurusanController::class, 'showByJurusan'])->name('jurusan.show');
 Route::get('/profil/{slug}', [PublicProfileController::class, 'showByProfile'])->name('profil.show');
 Route::get('/ikm/{slug}', [PublicIkmController::class, 'show'])->name('ikm.show');
+Route::get('/galeri/{slug}', [PublicGaleriController::class, 'show'])->name('galeri.show');
 
 // ✅ Route auth Breeze
 require __DIR__.'/auth.php';

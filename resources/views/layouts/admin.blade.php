@@ -326,6 +326,23 @@
             Konten IKM
         </a>
     </div>
+
+   {{-- Dropdown Galeri --}}
+<div class="relative mb-2" x-data="{ open: {{ request()->routeIs('admin.galeri.*') ? 'true' : 'false' }} }">
+    <a href="{{ route('admin.galeri.index') }}"
+       class="relative flex items-center pl-5 py-3 w-full rounded hover:bg-gray-300 transition text-lg
+              {{ request()->routeIs('admin.galeri.*') ? 'active' : '' }}">
+       <span class="flex items-center">
+           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                     d="M3 4a1 1 0 011-1h4l2 2h6l2-2h4a1 1 0 011 1v14a1 1 0 01-1 1H4a1 1 0 01-1-1V4z" />
+           </svg>
+           Galeri
+       </span>
+    </a>
+</div>
+
+
 </div>
 
 
