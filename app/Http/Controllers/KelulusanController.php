@@ -113,19 +113,22 @@ class KelulusanController extends Controller
                 // Hapus blok jika dicentang
                 if (isset($block['_delete']) && $block['_delete']) {
                     if (isset($block['id'])) {
-                        KelulusanBlock::find($block['id'])->delete();
+                        $oldBlock = KelulusanBlock::find($block['id']);
+                        if ($oldBlock) $oldBlock->delete();
                     }
                     continue;
                 }
 
-                // Ambil blok lama jika ada
-                $kelulusanBlock = $block['id'] ? KelulusanBlock::find($block['id']) : new KelulusanBlock();
+                // Ambil blok lama jika ada, atau buat baru
+                $kelulusanBlock = isset($block['id']) ? KelulusanBlock::find($block['id']) : new KelulusanBlock();
                 $kelulusanBlock->kelulusan_id = $kelulusan->id;
                 $kelulusanBlock->title = $block['title'] ?? null;
                 $kelulusanBlock->text = $block['text'] ?? null;
 
                 // === FOTO ===
-                $oldPhotos = $block['id'] ? json_decode(KelulusanBlock::find($block['id'])->photos, true) ?? [] : [];
+                $oldPhotos = isset($block['id'])
+                    ? json_decode(optional(KelulusanBlock::find($block['id']))->photos, true) ?? []
+                    : [];
                 $deletedPhotos = $block['_delete_files'] ?? [];
                 $remainingPhotos = array_diff($oldPhotos, $deletedPhotos);
                 $newPhotos = [];
@@ -137,7 +140,9 @@ class KelulusanController extends Controller
                 $kelulusanBlock->photos = json_encode(array_merge($remainingPhotos, $newPhotos));
 
                 // === VIDEO ===
-                $oldVideos = $block['id'] ? json_decode(KelulusanBlock::find($block['id'])->videos, true) ?? [] : [];
+                $oldVideos = isset($block['id'])
+                    ? json_decode(optional(KelulusanBlock::find($block['id']))->videos, true) ?? []
+                    : [];
                 $deletedVideos = $block['_delete_files'] ?? [];
                 $remainingVideos = array_diff($oldVideos, $deletedVideos);
                 $newVideos = [];
@@ -149,7 +154,9 @@ class KelulusanController extends Controller
                 $kelulusanBlock->videos = json_encode(array_merge($remainingVideos, $newVideos));
 
                 // === FILE LAIN ===
-                $oldFiles = $block['id'] ? json_decode(KelulusanBlock::find($block['id'])->files, true) ?? [] : [];
+                $oldFiles = isset($block['id'])
+                    ? json_decode(optional(KelulusanBlock::find($block['id']))->files, true) ?? []
+                    : [];
                 $deletedFiles = $block['_delete_files'] ?? [];
                 $remainingFiles = array_diff($oldFiles, $deletedFiles);
                 $newFiles = [];
@@ -169,6 +176,7 @@ class KelulusanController extends Controller
 
         return redirect()->route('admin.kelulusan.index')->with('success', 'Kelulusan berhasil diperbarui.');
     }
+
 
     public function destroy(Kelulusan $kelulusan)
     {
