@@ -8,7 +8,7 @@
 <style>
     .content-html {
         max-width: 100%;
-        color: #4a5568;
+        color: #000000;
         line-height: 1.7;
         font-family: sans-serif;
     }

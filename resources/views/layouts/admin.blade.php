@@ -341,6 +341,22 @@
        </span>
     </a>
 </div>
+{{-- Dropdown Kelulusan --}}
+<div class="relative mb-2" x-data="{ open: {{ request()->routeIs('admin.kelulusan.*') ? 'true' : 'false' }} }">
+    <a href="{{ route('admin.kelulusan.index') }}"
+       class="relative flex items-center pl-5 py-3 w-full rounded hover:bg-gray-300 transition text-lg
+              {{ request()->routeIs('admin.kelulusan.*') ? 'active' : '' }}">
+       <span class="flex items-center">
+           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                     d="M12 14l9-5-9-5-9 5 9 5z" />
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                     d="M12 14l6.16-3.422a12.083 12.083 0 01.84 4.422c0 3.866-3.582 7-8 7s-8-3.134-8-7a12.083 12.083 0 01.84-4.422L12 14z" />
+           </svg>
+           Kelulusan
+       </span>
+    </a>
+</div>
 
 
 </div>

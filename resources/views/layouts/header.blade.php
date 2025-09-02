@@ -117,9 +117,16 @@
 
 
 
-            <li><a href="#"
-                    class="{{ request()->routeIs('kelulusan') ? 'text-green-500 border-b-2 border-green-500' : 'hover:text-green-500 hover:border-b-2 hover:border-green-500' }} pb-1">Kelulusan</a>
-            </li>
+        @php
+        $firstKelulusan = \App\Models\Kelulusan::first(); // ambil kelulusan pertama dari DB
+    @endphp
+
+    <li>
+        <a href="{{ $firstKelulusan ? route('kelulusan.show', ['slug' => $firstKelulusan->slug]) : '#' }}"
+           class="{{ request()->routeIs('kelulusan.show') ? 'text-green-500 border-b-2 border-green-500' : 'hover:text-green-500 hover:border-b-2 hover:border-green-500' }} pb-1">
+           Kelulusan
+        </a>
+    </li>
 
             <!-- Lainnya dengan Submenu -->
             <li class="relative group">

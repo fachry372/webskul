@@ -7,7 +7,7 @@
 <style>
  .content-html {
         max-width: 100%;
-        color: #4a5568;
+        color: #000000;
         line-height: 1.7;
         font-family: sans-serif;
     }
@@ -99,32 +99,49 @@ iframe.file-viewer { width: 100%; height: 75vh; max-height: 600px; border: 1px s
                 <div class="content-html mb-4">{!! $block['text'] !!}</div>
             @endif
 
-            {{-- Foto --}}
-            @if(!empty($block['photos']) && is_array($block['photos']))
-                <div class="grid gap-4 mt-4" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-                    @foreach($block['photos'] as $photo)
-                        @if($photo)
-                            <div class="w-full flex justify-center">
-                                <img src="{{ Storage::url($photo) }}" class="gallery-image shadow">
-                            </div>
-                        @endif
-                    @endforeach
-                </div>
-            @endif
+           <!-- Foto -->
+@if(!empty($block['photos']) && is_array($block['photos']))
+<div class="grid gap-4 mt-4" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+    @foreach($block['photos'] as $photo)
+        @if($photo)
+            <div class="w-full flex justify-center">
+                <img src="{{ Storage::url($photo) }}" class="gallery-image shadow">
+            </div>
+        @endif
+    @endforeach
+</div>
+@endif
 
-            {{-- Video Lokal --}}
-            @if(!empty($block['videos']) && is_array($block['videos']))
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                    @foreach($block['videos'] as $video)
-                        @if($video)
-                            <div class="video-embed-wrapper aspect-16-9">
-                                <video src="{{ Storage::url($video) }}" controls></video>
-                            </div>
-                            <a href="{{ Storage::url($video) }}" class="download-btn block text-center">Download Video</a>
-                        @endif
-                    @endforeach
+<!-- Video Lokal -->
+@if(!empty($block['videos']) && is_array($block['videos']))
+    <h3 class="text-xl font-semibold mt-6 mb-2">Video</h3>
+
+    @php
+        $videoCount = count(array_filter($block['videos']));
+    @endphp
+
+    @if($videoCount === 1)
+        @foreach($block['videos'] as $video)
+            @if($video)
+                <div class="video-embed-wrapper aspect-16-9 w-full mb-4">
+                    <video src="{{ Storage::url($video) }}" controls class="w-full h-full rounded-lg shadow"></video>
                 </div>
+                {{-- <a href="{{ Storage::url($video) }}" class="download-btn block text-center">Download Video</a> --}}
             @endif
+        @endforeach
+    @else
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+            @foreach($block['videos'] as $video)
+                @if($video)
+                    <div class="video-embed-wrapper aspect-16-9">
+                        <video src="{{ Storage::url($video) }}" controls class="w-full h-full rounded-lg shadow"></video>
+                    </div>
+                    {{-- <a href="{{ Storage::url($video) }}" class="download-btn block text-center">Download Video</a> --}}
+                @endif
+            @endforeach
+        </div>
+    @endif
+@endif
 
             {{-- Video Link --}}
             @if(!empty($block['videos_link']) && is_array($block['videos_link']))
@@ -135,16 +152,17 @@ iframe.file-viewer { width: 100%; height: 75vh; max-height: 600px; border: 1px s
                     $portraitLinks = $instagramLinks->merge($tiktokLinks);
                 @endphp
 
-                @if($youtubeLinks->isNotEmpty())
-                    <h3 class="text-xl font-semibold mt-6 mb-2">YouTube Videos</h3>
-                    <div class="grid gap-6 justify-items-center @if($youtubeLinks->count()>=2) md:grid-cols-2 @endif">
-                        @foreach($youtubeLinks as $link)
-                            <div class="video-embed-wrapper aspect-16-9 w-full">
-                                <iframe src="{{ convertVideoLink($link) }}" allowfullscreen></iframe>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
+               {{-- YouTube Videos --}}
+@if($youtubeLinks->isNotEmpty())
+<h3 class="text-xl font-semibold mt-6 mb-2">YouTube Videos</h3>
+<div class="grid gap-6 justify-items-center md:grid-cols-3">
+    @foreach($youtubeLinks as $link)
+        <div class="video-embed-wrapper aspect-16-9 w-full">
+            <iframe src="{{ convertVideoLink($link) }}" allowfullscreen></iframe>
+        </div>
+    @endforeach
+</div>
+@endif
 
                 @if($portraitLinks->isNotEmpty())
                 <h3 class="text-xl font-semibold mt-6 mb-2">Instagram / TikTok Videos</h3>
