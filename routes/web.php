@@ -15,6 +15,10 @@ use App\Http\Controllers\GaleriController;
 use App\Http\Controllers\PublicGaleriController;
 use App\Http\Controllers\KelulusanController;
 use App\Http\Controllers\PublicKelulusanController;
+use App\Http\Controllers\InformasiTerbaruController;
+use App\Http\Controllers\KategoriInformasiController;
+use App\Http\Controllers\PublicInformasiController;
+
 Route::get('/', [BerandaController::class, 'index'])->name('beranda');
 Route::get('/beranda', [BerandaController::class, 'index']);
 
@@ -67,6 +71,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
 Route::resource('galeri', GaleriController::class)->names('galeri');
 Route::resource('kelulusan', KelulusanController::class)->names('kelulusan');
 
+Route::resource('admin/informasi', InformasiTerbaruController::class);
+Route::resource('admin/kategori', KategoriInformasiController::class);
+
 
     });
 });
@@ -77,6 +84,10 @@ Route::get('/profil/{slug}', [PublicProfileController::class, 'showByProfile'])-
 Route::get('/ikm/{slug}', [PublicIkmController::class, 'show'])->name('ikm.show');
 Route::get('/galeri/{slug}', [PublicGaleriController::class, 'show'])->name('galeri.show');
 Route::get('/kelulusan/{slug}', [PublicKelulusanController::class, 'show'])->name('kelulusan.show');
+
+// ✅ Route publik informasi
+Route::get('/informasi', [PublicInformasiController::class, 'index'])->name('informasi.index');
+Route::get('/informasi/{slug}', [PublicInformasiController::class, 'show'])->name('informasi.show');
 
 // ✅ Route auth Breeze
 require __DIR__.'/auth.php';

@@ -357,6 +357,40 @@
        </span>
     </a>
 </div>
+{{-- Dropdown Informasi & Kategori --}}
+<div class="relative mb-2"
+     x-data="{ open: {{ request()->routeIs('admin.kategori.*') || request()->routeIs('admin.informasi.*') ? 'true' : 'false' }} }">
+
+    <a href="#" @click.prevent="open = !open"
+       class="relative flex items-center pl-5 py-3 w-full rounded hover:bg-gray-300 transition text-lg
+              {{ (request()->routeIs('admin.kategori.*') || request()->routeIs('admin.informasi.*')) ? 'active' : '' }}">
+        <span class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M5 13l4 4L19 7"/>
+            </svg>
+            Informasi & Kategori
+        </span>
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="w-5 h-5 absolute right-0 mr-2 transform transition-transform duration-200"
+             :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+    </a>
+
+    <div x-show="open" x-transition class="ml-6 mt-1.5 space-y-1.5">
+        <a href="{{ route('admin.kategori.index') }}"
+           class="flex items-center px-4 py-2 rounded hover:bg-gray-200 transition text-lg
+                  {{ request()->routeIs('admin.kategori.*') ? 'active' : '' }}">
+            Kategori
+        </a>
+        <a href="{{ route('admin.informasi.index') }}"
+           class="flex items-center px-4 py-2 rounded hover:bg-gray-200 transition text-lg
+                  {{ request()->routeIs('admin.informasi.*') ? 'active' : '' }}">
+            Informasi Terbaru
+        </a>
+    </div>
+</div>
 
 
 </div>

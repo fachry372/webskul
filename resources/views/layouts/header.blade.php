@@ -137,7 +137,12 @@
                     <li><a href="#" class="block px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-green-100">SPW</a></li>
                     <li><a href="#" class="block px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-green-100">TEFA</a></li>
                     <li><a href="#" class="block px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-green-100">SPMB</a></li>
-                    <li><a href="#" class="block px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-green-100">Informasi Terbaru</a></li>
+                    <li class="py-4 border-b border-white/30">
+                        <a href="{{ route('informasi.index') }}" class="block hover:text-green-400">
+                            Informasi Terbaru
+                        </a>
+                    </li>
+
                     <li class="relative group/submenu">
                         <a href="#" class="flex items-center justify-between px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-green-100">
                             Layanan TU
@@ -284,8 +289,11 @@
                     <a href="#" class="block hover:text-green-400">SPMB</a>
                 </li>
                 <li class="py-4 border-b border-white/30">
-                    <a href="#" class="block hover:text-green-400">Informasi Terbaru</a>
+                    <a href="{{ route('informasi.index') }}" class="block hover:text-green-400">
+                        Informasi Terbaru
+                    </a>
                 </li>
+
                 <li class="py-4 border-b border-white/30">
                     <button onclick="openSubmenu('layanan')" class="w-full text-left hover:text-green-400">
                         Layanan TU <i class="fas fa-chevron-right float-right"></i>
