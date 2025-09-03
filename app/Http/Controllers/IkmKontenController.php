@@ -187,14 +187,7 @@ class IkmKontenController extends Controller
 
 
 
-// public function destroy($id)
-// {
-//     $konten = IkmKonten::findOrFail($id);
-//     $konten->delete();
 
-//     return redirect()->route('admin.ikm_konten.index')
-//         ->with('success', 'Data berhasil dihapus');
-// }
 
 public function destroy($id)
 {

@@ -6,22 +6,10 @@
 <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
 <style>
     .ql-editor { min-height: 250px; background: #fff; border: 1px solid #ccc; border-radius: 4px; }
-    .gallery img { width: 100px; height: 100px; object-fit: cover; border: 1px solid #e5e7eb; border-radius: 4px; }
+    .gallery { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
     .img-wrapper { position: relative; display: inline-block; margin-right: 5px; margin-bottom: 5px; }
-    .img-wrapper span {
-        position: absolute;
-        top: -6px;
-        right: -6px;
-        background: #dc2626;
-        color: white;
-        font-size: 14px;
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        line-height: 18px;
-        text-align: center;
-        cursor: pointer;
-    }
+    .img-wrapper img { width: 100px; height: 100px; object-fit: cover; border: 1px solid #e5e7eb; border-radius: 4px; }
+    .img-wrapper span { position: absolute; top: -6px; right: -6px; background: #dc2626; color: white; font-size: 14px; border-radius: 50%; width: 20px; height: 20px; line-height: 18px; text-align: center; cursor: pointer; }
 </style>
 @endsection
 
@@ -69,23 +57,21 @@
         <div class="mb-4">
             <label class="block font-semibold">Tanggal Publish</label>
             <input type="date" name="tanggal_publish"
-                value="{{ old('tanggal_publish', $informasi->tanggal_publish? $informasi->tanggal_publish->format('Y-m-d'):'') }}"
+                value="{{ old('tanggal_publish', $informasi->tanggal_publish? $informasi->tanggal_publish->format('Y-m-d') : now()->format('Y-m-d')) }}"
                 class="w-full border rounded p-2 @error('tanggal_publish') border-red-500 @enderror">
             @error('tanggal_publish') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
         </div>
 
-
-
         {{-- Upload & Preview Gambar --}}
         <div class="mb-4">
             <label class="block font-semibold">Gambar</label>
-            <input type="file" name="gambar[]" id="gambar" multiple accept="image/*" class="w-full border rounded p-2 @error('gambar.*') border-red-500 @enderror">
+            <input type="file" id="gambar" name="gambar[]" multiple accept="image/*" class="w-full border rounded p-2 @error('gambar.*') border-red-500 @enderror">
 
-            <div id="preview-gambar" class="gallery mt-2 flex flex-wrap gap-2">
+            <div id="preview-gambar" class="gallery">
                 {{-- Gambar lama --}}
                 @foreach($informasi->gambar as $img)
-                    <div class="img-wrapper" data-old-id="{{ $img->id }}">
-                        <img src="{{ asset('storage/'.$img->nama_file) }}" class="w-24 h-24 object-cover border rounded">
+                    <div class="img-wrapper old" data-id="{{ $img->id }}">
+                        <img src="{{ asset('storage/'.$img->nama_file) }}">
                         <span class="remove-old">×</span>
                     </div>
                 @endforeach
@@ -133,17 +119,16 @@ document.addEventListener('DOMContentLoaded', () => {
     quill.root.innerHTML = textarea.value;
     quill.on('text-change', () => textarea.value = quill.root.innerHTML);
 
-    // Preview gambar lama dan baru
+    // Preview gambar lama & baru
     const input = document.getElementById('gambar');
     const preview = document.getElementById('preview-gambar');
     const deleteInput = document.getElementById('delete-gambar');
-    let filesArray = [];
 
     // Hapus gambar lama
     preview.addEventListener('click', e => {
         if(e.target.classList.contains('remove-old')){
             const wrapper = e.target.closest('.img-wrapper');
-            const oldId = wrapper.dataset.oldId;
+            const oldId = wrapper.dataset.id;
             let current = deleteInput.value ? deleteInput.value.split(',') : [];
             if(!current.includes(oldId)) current.push(oldId);
             deleteInput.value = current.join(',');
@@ -152,43 +137,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Preview gambar baru
-    input.addEventListener('change', e => {
-        filesArray = filesArray.concat(Array.from(e.target.files));
-        renderPreview();
-    });
+    input.addEventListener('change', () => {
+        // Hapus preview lama file baru
+        preview.querySelectorAll('.new').forEach(el => el.remove());
 
-    function renderPreview(){
-    // Hapus preview lama untuk file baru
-    preview.querySelectorAll('.new').forEach(el=>el.remove());
+        Array.from(input.files).forEach((file, idx) => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'img-wrapper new';
+                wrapper.style.position = 'relative';
 
-    // Reset input file agar file yg sudah dihapus tidak ikut terkirim
-    input.value = '';
+                const img = document.createElement('img');
+                img.src = e.target.result;
 
-    filesArray.forEach((file, index)=>{
-        const reader = new FileReader();
-        reader.onload = ev=>{
-            const wrapper = document.createElement('div');
-            wrapper.className='img-wrapper new';
-            wrapper.style.position='relative';
-            const img = document.createElement('img');
-            img.src = ev.target.result;
-            img.className='w-24 h-24 object-cover border rounded';
+                const btn = document.createElement('span');
+                btn.innerHTML = '×';
+                btn.onclick = () => {
+                    wrapper.remove();
+                    // hapus file dari input
+                    const dt = new DataTransfer();
+                    Array.from(input.files).forEach((f, i) => { if(i !== idx) dt.items.add(f); });
+                    input.files = dt.files;
+                };
 
-            const btn = document.createElement('span');
-            btn.innerHTML='×';
-            btn.onclick = ()=>{
-                filesArray.splice(index,1);
-                renderPreview();
+                wrapper.appendChild(img);
+                wrapper.appendChild(btn);
+                preview.appendChild(wrapper);
             };
-
-            wrapper.appendChild(img);
-            wrapper.appendChild(btn);
-            preview.appendChild(wrapper);
-        };
-        reader.readAsDataURL(file);
+            reader.readAsDataURL(file);
+        });
     });
-}
-
 });
 </script>
 @endsection

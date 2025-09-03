@@ -18,6 +18,10 @@ use App\Http\Controllers\PublicKelulusanController;
 use App\Http\Controllers\InformasiTerbaruController;
 use App\Http\Controllers\KategoriInformasiController;
 use App\Http\Controllers\PublicInformasiController;
+use App\Http\Controllers\LainnyaController;
+use App\Http\Controllers\LainnyaKontenController;
+use App\Http\Controllers\PublicLainnyaController;
+
 
 Route::get('/', [BerandaController::class, 'index'])->name('beranda');
 Route::get('/beranda', [BerandaController::class, 'index']);
@@ -74,7 +78,8 @@ Route::resource('kelulusan', KelulusanController::class)->names('kelulusan');
 Route::resource('admin/informasi', InformasiTerbaruController::class);
 Route::resource('admin/kategori', KategoriInformasiController::class);
 
-
+Route::resource('lainnya', LainnyaController::class);
+Route::resource('lainnya_konten', LainnyaKontenController::class);
     });
 });
 
@@ -88,6 +93,8 @@ Route::get('/kelulusan/{slug}', [PublicKelulusanController::class, 'show'])->nam
 // ✅ Route publik informasi
 Route::get('/informasi', [PublicInformasiController::class, 'index'])->name('informasi.index');
 Route::get('/informasi/{slug}', [PublicInformasiController::class, 'show'])->name('informasi.show');
+
+Route::get('/lainnya/{slug}', [PublicLainnyaController::class, 'show'])->name('lainnya.show');
 
 // ✅ Route auth Breeze
 require __DIR__.'/auth.php';

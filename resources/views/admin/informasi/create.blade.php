@@ -49,15 +49,17 @@
             @enderror
         </div>
 
-        {{-- Tanggal Publish --}}
-        <div class="mb-4">
-            <label for="tanggal_publish" class="block font-semibold">Tanggal Publish</label>
-            <input type="date" name="tanggal_publish" id="tanggal_publish" value="{{ old('tanggal_publish') }}"
-                class="w-full border rounded p-2 @error('tanggal_publish') border-red-500 @enderror">
-            @error('tanggal_publish')
-                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+       {{-- Tanggal Publish --}}
+<div class="mb-4">
+    <label for="tanggal_publish" class="block font-semibold">Tanggal Publish</label>
+    <input type="date" name="tanggal_publish" id="tanggal_publish"
+        value="{{ old('tanggal_publish', date('Y-m-d')) }}"
+        class="w-full border rounded p-2 @error('tanggal_publish') border-red-500 @enderror">
+    @error('tanggal_publish')
+        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+    @enderror
+</div>
+
 
         {{-- Upload Gambar (di atas isi) --}}
         <div class="mb-4">

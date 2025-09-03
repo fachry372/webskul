@@ -128,34 +128,47 @@
         </a>
     </li>
 
-            <!-- Lainnya dengan Submenu -->
-            <li class="relative group">
-                <a href="#" onclick="event.preventDefault();"
-                    class="pb-1 hover:text-green-500 hover:border-b-2 hover:border-green-500">Lainnya</a>
-                <ul class="absolute left-0 top-full bg-white shadow-md rounded-md w-64 py-2 z-50 hidden group-hover:block">
-                    <li><a href="#" class="block px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-green-100">BKK</a></li>
-                    <li><a href="#" class="block px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-green-100">SPW</a></li>
-                    <li><a href="#" class="block px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-green-100">TEFA</a></li>
-                    <li><a href="#" class="block px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-green-100">SPMB</a></li>
-                    <li class="py-4 border-b border-white/30">
-                        <a href="{{ route('informasi.index') }}" class="block hover:text-green-400">
-                            Informasi Terbaru
-                        </a>
-                    </li>
+         <!-- Lainnya dengan Submenu -->
+<li class="relative group">
+    <a href="#" onclick="event.preventDefault();"
+       class="pb-1 hover:text-green-500 hover:border-b-2 hover:border-green-500">Lainnya</a>
 
-                    <li class="relative group/submenu">
-                        <a href="#" class="flex items-center justify-between px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-green-100">
-                            Layanan TU
-                            <svg class="w-4 h-4 ml-2 text-gray-400 group-hover/submenu:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </a>
-                        <ul class="absolute top-0 right-full mr-2 w-48 bg-white shadow-md rounded-md py-2 z-50 hidden group-hover/submenu:block">
-                            <li><a href="#" class="block px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-green-100">Legalisir</a></li>
-                        </ul>
-                    </li>
-                </ul>
+    <ul class="absolute left-0 top-full bg-white shadow-md rounded-md w-64 py-2 z-50 hidden group-hover:block">
+
+        {{-- Loop menu Lainnya langsung dari model --}}
+        @php
+            use App\Models\Lainnya;
+            $menus = Lainnya::all()->pluck('slug', 'title')->toArray();
+        @endphp
+
+        @if(!empty($menus))
+            @foreach($menus as $title => $slug)
+                <li>
+                    <a href="{{ route('lainnya.show', $slug) }}"
+                       class="block px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-green-100">
+                        {{ $title }}
+                    </a>
+                </li>
+            @endforeach
+        @else
+            <li>
+                <span class="block px-4 py-2 text-sm text-gray-400">Menu kosong</span>
             </li>
+        @endif
+
+        {{-- Item statis: Informasi Terbaru, samakan style dengan menu lainnya --}}
+        <li>
+            <a href="{{ route('informasi.index') }}"
+               class="block px-4 py-2 text-sm text-gray-500 hover:text-gray-700 hover:bg-green-100">
+                Informasi Terbaru
+            </a>
+        </li>
+
+    </ul>
+</li>
+
+
+
         </ul>
 
         <!-- Search Bar: desktop only (kanan) -->

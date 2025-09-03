@@ -392,6 +392,50 @@
     </div>
 </div>
 
+{{-- Dropdown Lainnya --}}
+@php
+    // Tentukan apakah dropdown harus terbuka
+    $isDropdownOpen = request()->routeIs('admin.lainnya.*') || request()->routeIs('admin.lainnya_konten.*');
+@endphp
+
+<div class="relative mb-2"
+     x-data="{ open: {{ $isDropdownOpen ? 'true' : 'false' }} }">
+
+    <a href="#" @click.prevent="open = !open"
+       class="relative flex items-center pl-5 py-3 w-full rounded hover:bg-gray-300 transition text-lg
+              {{ $isDropdownOpen ? 'active' : '' }}">
+        <span class="flex items-center">
+            {{-- Logo --}}
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+            Lainnya
+        </span>
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="w-5 h-5 absolute right-0 mr-2 transform transition-transform duration-200"
+             :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+    </a>
+
+    <div x-show="open" x-transition class="ml-6 mt-1.5 space-y-1.5">
+        {{-- Menu Daftar Lainnya --}}
+        <a href="{{ route('admin.lainnya.index') }}"
+           class="flex items-center px-4 py-2 rounded hover:bg-gray-200 transition text-lg
+                  {{ request()->routeIs('admin.lainnya.*') ? 'active' : '' }}">
+            Daftar Lainnya
+        </a>
+
+        {{-- Menu Konten Lainnya --}}
+        <a href="{{ route('admin.lainnya_konten.index') }}"
+           class="flex items-center px-4 py-2 rounded hover:bg-gray-200 transition text-lg
+                  {{ request()->routeIs('admin.lainnya_konten.*') ? 'active' : '' }}">
+           Konten Lainnya
+        </a>
+    </div>
+</div>
+
 
 </div>
 

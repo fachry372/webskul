@@ -20,7 +20,7 @@
 
 <div class="max-w-6xl mx-auto py-10 px-4 grid md:grid-cols-3 gap-8">
 
-    {{-- Sidebar (mobile atas, desktop kanan) --}}
+    {{-- Sidebar --}}
     <aside class="md:col-span-1 space-y-6 order-first md:order-last" data-aos="fade-left">
         {{-- Pencarian --}}
         <div class="bg-white rounded-xl shadow p-5">
@@ -35,20 +35,27 @@
             </form>
         </div>
 
-        {{-- Kategori --}}
         <div class="bg-white rounded-xl shadow p-5">
             <h3 class="text-lg font-bold mb-4">Kategori</h3>
-            <ul class="space-y-2">
+            <div class="flex flex-col gap-3">
+                <!-- Semua Informasi -->
+                <a href="{{ route('informasi.index') }}"
+                   class="block px-4 py-2 rounded-lg border border-gray-200 shadow-sm hover:bg-blue-50
+                          {{ request('kategori') ? 'bg-white' : 'bg-blue-100 font-semibold border-blue-300' }}">
+                    Semua Informasi
+                </a>
+
+                <!-- Kategori lain -->
                 @foreach($kategoris as $kat)
-                    <li>
-                        <a href="{{ route('informasi.index', ['kategori' => $kat->id]) }}"
-                           class="text-blue-600 hover:underline {{ request('kategori') == $kat->id ? 'font-semibold' : '' }}">
-                            {{ $kat->nama }}
-                        </a>
-                    </li>
+                    <a href="{{ route('informasi.index', ['kategori' => $kat->id]) }}"
+                       class="block px-4 py-2 rounded-lg border border-gray-200 shadow-sm hover:bg-blue-50
+                              {{ request('kategori') == $kat->id ? 'bg-blue-100 font-semibold border-blue-300' : 'bg-white' }}">
+                        {{ $kat->nama }}
+                    </a>
                 @endforeach
-            </ul>
+            </div>
         </div>
+
     </aside>
 
     {{-- Konten utama (daftar informasi) --}}
@@ -57,11 +64,7 @@
             <div class="bg-white rounded-xl shadow hover:shadow-lg transform hover:-translate-y-1 transition p-5"
                  data-aos="fade-up">
 
-                @if($info->gambar->first())
-                    <img src="{{ Storage::url($info->gambar->first()->nama_file) }}"
-                         class="w-full h-40 object-cover rounded-lg mb-4">
-                @endif
-
+                {{-- Judul & info --}}
                 <h2 class="text-xl font-semibold mb-2">{{ $info->judul }}</h2>
                 <p class="text-sm text-gray-500 mb-2">
                     {{ $info->kategori->nama ?? '-' }} • {{ $info->tanggal_publish?->format('d M Y') }}

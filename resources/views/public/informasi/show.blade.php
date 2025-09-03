@@ -85,18 +85,16 @@
     <article class="bg-white p-6 rounded-lg shadow" data-aos="fade-up">
 
         @if($informasi->gambar->count())
-    <div class="flex flex-wrap justify-center gap-4 mb-6 gallery">
-        @foreach($informasi->gambar as $img)
-            <img src="{{ Storage::url($img->nama_file) }}"
-                 @if($informasi->gambar->count() == 1)
-                    class="w-2/3 rounded-lg shadow"
-                 @else
-                    class="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 rounded-lg shadow"
-                 @endif
-                 style="height: auto; object-fit: contain;">
-        @endforeach
-    </div>
-@endif
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6 gallery">
+            @foreach($informasi->gambar as $img)
+                <div class="w-full h-48 overflow-hidden rounded-lg shadow"> <!-- wrapper untuk konsistensi -->
+                    <img src="{{ Storage::url($img->nama_file) }}"
+                         class="w-full h-full object-cover"
+                         alt="Gambar Informasi">
+                </div>
+            @endforeach
+        </div>
+        @endif
 
 
         {{-- Konten --}}
@@ -104,24 +102,27 @@
             {!! $informasi->isi !!}
         </div>
 
-        {{-- Navigasi Next & Previous --}}
-        <div class="flex justify-between items-center mt-10">
-            @if($prev)
-                <a href="{{ route('informasi.show', $prev->slug) }}"
-                   class="px-4 py-2 bg-[#344966] text-white rounded-lg hover:bg-[#2c3a57] transition">
-                   ← {{ Str::limit($prev->judul, 40) }}
-                </a>
-            @else
-                <span></span>
-            @endif
+       {{-- Navigasi Next & Previous --}}
+<div class="flex justify-between items-center mt-10">
+    {{-- Previous --}}
+    @if($prev)
+        <a href="{{ route('informasi.show', $prev->slug) }}"
+           class="px-4 py-2 bg-[#344966] text-white rounded-lg hover:bg-[#2c3a57] transition">
+            ← Sebelumnya
+        </a>
+    @else
+        <span></span>
+    @endif
 
-            @if($next)
-                <a href="{{ route('informasi.show', $next->slug) }}"
-                   class="px-4 py-2 bg-[#344966] text-white rounded-lg hover:bg-[#2c3a57] transition">
-                   {{ Str::limit($next->judul, 40) }} →
-                </a>
-            @endif
-        </div>
+    {{-- Next --}}
+    @if($next)
+        <a href="{{ route('informasi.show', $next->slug) }}"
+           class="px-4 py-2 bg-[#344966] text-white rounded-lg hover:bg-[#2c3a57] transition">
+            Selanjutnya →
+        </a>
+    @endif
+</div>
+
 
         {{-- Tombol kembali ke daftar --}}
         <div class="mt-6 text-center">
