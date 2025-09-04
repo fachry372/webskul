@@ -210,6 +210,120 @@
     </section>
 
 
+    @php
+use Illuminate\Support\Str;
+@endphp
+
+<!-- Informasi Terbaru -->
+<section class="w-full py-12 px-4 md:px-8 bg-gray-100">
+    <h2 class="text-3xl font-bold text-gray-900 mb-8">Informasi Terbaru</h2>
+
+    <div class="space-y-6">
+        @forelse($informasis as $info)
+            <div class="bg-white rounded-xl shadow hover:shadow-lg transform hover:-translate-y-1 transition p-6">
+                {{-- Kategori --}}
+                @if($info->kategori)
+                    <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-semibold">
+                        {{ $info->kategori->nama }}
+                    </span>
+                @endif
+
+                {{-- Judul --}}
+                <h3 class="text-xl font-semibold text-gray-900 mt-2 mb-1">{{ $info->judul }}</h3>
+
+                {{-- Tanggal --}}
+                <p class="text-sm text-gray-500 mb-3">{{ $info->tanggal_publish?->format('d M Y') ?? '-' }}</p>
+
+                {{-- Preview isi --}}
+                <p class="text-gray-700 mb-4 line-clamp-4">
+                    {!! Str::limit(strip_tags($info->isi), 250) !!}
+                </p>
+
+                {{-- Tombol Read More --}}
+                <a href="{{ route('informasi.show', $info->slug) }}"
+                   class="inline-block bg-[#344966] hover:bg-[#2c3a57] text-white px-5 py-2 rounded-lg font-semibold transition">
+                    Read More →
+                </a>
+            </div>
+        @empty
+            <p class="text-gray-500 text-center">Belum ada informasi terbaru yang dipublish.</p>
+        @endforelse
+    </div>
+</section>
+
+<!-- Garis Pemisah -->
+<div class="w-full my-12 border-t border-gray-300"></div>
+
+<!-- Kotak Saran & Testimoni -->
+<section class="w-full py-12 px-4 md:px-8 bg-gray-50">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:gap-8 justify-center items-stretch">
+        <!-- justify-center → center horizontal, items-stretch → kolom sama tinggi -->
+
+      <!-- Testimoni Alumni (Kiri) -->
+<div class="md:flex-1 bg-gray-100 rounded-xl shadow-lg p-8 flex flex-col mb-6 md:mb-0">
+    <h2 class="text-3xl font-bold text-gray-900 mb-4 text-center">Testimoni Alumni</h2>
+
+    <!-- Slider Container (mengisi ruang) -->
+    <div class="space-y-6 h-56 overflow-hidden relative w-full flex-1" id="testimonial-slider">
+        <div class="testimonial-item absolute inset-0 transition-all opacity-100 flex flex-col justify-center">
+            <p class="text-gray-700 mb-3 line-clamp-3">
+                "SMK Negeri 1 Subang benar-benar membekali saya dengan keterampilan dan karakter yang dibutuhkan untuk dunia kerja. Guru-guru profesional dan suasana belajar menyenangkan!"
+            </p>
+            <p class="text-sm text-gray-500 font-semibold">— Deden Suryanto, Alumni 2020</p>
+        </div>
+        <div class="testimonial-item absolute inset-0 transition-all opacity-0 flex flex-col justify-center">
+            <p class="text-gray-700 mb-3 line-clamp-3">
+                "Program CEREN benar-benar membantu saya memahami dunia industri sejak dini. Sangat direkomendasikan untuk calon siswa!"
+            </p>
+            <p class="text-sm text-gray-500 font-semibold">— Rina Putri, Alumni 2021</p>
+        </div>
+    </div>
+
+    <!-- Bullets di paling bawah -->
+     <!-- Bullets -->
+     <div class="flex justify-center mt-4 space-x-2" id="testimonial-bullets">
+        <button class="w-3 h-3 rounded-full bg-gray-400" data-index="0"></button>
+        <button class="w-3 h-3 rounded-full bg-gray-400" data-index="1"></button>
+    </div>
+</div>
+
+
+        <!-- Kotak Saran (Kanan) -->
+        <div class="md:flex-1 bg-gray-100 rounded-xl shadow-lg p-8 flex flex-col justify-start">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 text-center">Saran & Masukan</h2>
+
+            <form action="#" method="POST" class="space-y-4 flex flex-col w-full max-w-md mx-auto">
+                @csrf
+                <div>
+                    <label for="nama" class="block text-gray-700 font-semibold mb-1 ">Nama</label>
+                    <input type="text" id="nama" name="nama"
+                           class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#344966]"
+                           placeholder="Nama Anda">
+                </div>
+                <div>
+                    <label for="email" class="block text-gray-700 font-semibold mb-1">Email</label>
+                    <input type="email" id="email" name="email"
+                           class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#344966]"
+                           placeholder="Email Anda">
+                </div>
+                <div>
+                    <label for="saran" class="block text-gray-700 font-semibold mb-1">Saran / Masukan</label>
+                    <textarea id="saran" name="saran" rows="5"
+                              class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#344966]"
+                              placeholder="Tulis saran Anda..."></textarea>
+                </div>
+                <button type="submit"
+                        class="bg-[#344966] text-white px-6 py-2 rounded-lg hover:bg-[#2c3a57] font-semibold transition mt-2">
+                    Kirim Saran
+                </button>
+            </form>
+        </div>
+
+    </div>
+</section>
+
+
+
 
     <!-- Script -->
     <script>
@@ -231,5 +345,38 @@
                 slides[current].classList.add('z-10');
             }, 7000); // Ganti setiap 7 detik
         });
+
+        // Script Slider Testimoni
+        document.addEventListener('DOMContentLoaded', () => {
+        const items = document.querySelectorAll('#testimonial-slider .testimonial-item');
+        const bullets = document.querySelectorAll('#testimonial-bullets button');
+        let current = 0;
+
+        function showTestimonial(index) {
+            items.forEach((item, i) => {
+                item.classList.toggle('opacity-100', i === index);
+                item.classList.toggle('opacity-0', i !== index);
+            });
+
+            bullets.forEach((b, i) => {
+                b.classList.toggle('bg-[#344966]', i === index);
+                b.classList.toggle('bg-gray-400', i !== index);
+            });
+
+            current = index;
+        }
+
+        bullets.forEach(bullet => {
+            bullet.addEventListener('click', () => {
+                showTestimonial(parseInt(bullet.dataset.index));
+            });
+        });
+
+        // Auto-slide setiap 5 detik
+        setInterval(() => {
+            let next = (current + 1) % items.length;
+            showTestimonial(next);
+        }, 7000);
+    });
     </script>
 @endsection

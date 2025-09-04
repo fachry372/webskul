@@ -58,32 +58,49 @@
 
     </aside>
 
-    {{-- Konten utama (daftar informasi) --}}
-    <div class="md:col-span-2 space-y-6 order-last md:order-first">
-        @forelse($informasis as $info)
-            <div class="bg-white rounded-xl shadow hover:shadow-lg transform hover:-translate-y-1 transition p-5"
-                 data-aos="fade-up">
+  {{-- Konten utama (daftar informasi) --}}
+<div class="md:col-span-2 space-y-6 order-last md:order-first">
 
-                {{-- Judul & info --}}
-                <h2 class="text-xl font-semibold mb-2">{{ $info->judul }}</h2>
-                <p class="text-sm text-gray-500 mb-2">
-                    {{ $info->kategori->nama ?? '-' }} • {{ $info->tanggal_publish?->format('d M Y') }}
-                </p>
-                <p class="text-gray-600 mb-3 line-clamp-3">{!! Str::limit(strip_tags($info->isi), 100) !!}</p>
-                <a href="{{ route('informasi.show', $info->slug) }}"
-                   class="inline-block bg-[#344966] text-white px-4 py-2 rounded-lg hover:bg-[#2c3a57] transition">
-                    Read More →
-                </a>
-            </div>
-        @empty
-            <p class="text-gray-500">Belum ada informasi.</p>
-        @endforelse
+    {{-- Info filter / search --}}
+    @if(request('search') || request('kategori'))
+        <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg mb-4 shadow">
+            @if(request('search'))
+                Sedang mencari: <span class="font-semibold">{{ request('search') }}</span>
+            @endif
 
-        {{-- Pagination --}}
-        <div>
-            {{ $informasis->links() }}
+            @if(request('kategori'))
+                @php
+                    $katName = $kategoris->firstWhere('id', request('kategori'))->nama ?? 'Semua';
+                @endphp
+                <span class="ml-2">Kategori: <span class="font-semibold">{{ $katName }}</span></span>
+            @endif
         </div>
+    @endif
+
+    @forelse($informasis as $info)
+        <div class="bg-white rounded-xl shadow hover:shadow-lg transform hover:-translate-y-1 transition p-5"
+             data-aos="fade-up">
+
+            {{-- Judul & info --}}
+            <h2 class="text-xl font-semibold mb-2">{{ $info->judul }}</h2>
+            <p class="text-sm text-gray-500 mb-2">
+                {{ $info->kategori->nama ?? '-' }} • {{ $info->tanggal_publish?->format('d M Y') }}
+            </p>
+            <p class="text-gray-600 mb-3 line-clamp-3">{!! Str::limit(strip_tags($info->isi), 100) !!}</p>
+            <a href="{{ route('informasi.show', $info->slug) }}"
+               class="inline-block bg-[#344966] text-white px-4 py-2 rounded-lg hover:bg-[#2c3a57] transition">
+                Read More →
+            </a>
+        </div>
+    @empty
+        <p class="text-gray-500">Belum ada informasi.</p>
+    @endforelse
+
+    {{-- Pagination --}}
+    <div>
+        {{ $informasis->links() }}
     </div>
+</div>
 
 </div>
 
