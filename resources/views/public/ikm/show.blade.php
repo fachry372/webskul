@@ -5,78 +5,123 @@
 @section('styles')
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 <style>
- .content-html {
-        max-width: 100%;
-        color: #000000;
-        line-height: 1.7;
-        font-family: sans-serif;
-    }
-    .content-html h1 { font-size: 2rem; font-weight: bold; margin-bottom: 1rem; }
-    .content-html h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 0.75rem; }
-    .content-html h3 { font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5rem; }
-    .content-html h4 { font-size: 1.125rem; font-weight: bold; margin-bottom: 0.5rem; }
-    .content-html h5 { font-size: 1rem; font-weight: bold; margin-bottom: 0.5rem; }
-    .content-html h6 { font-size: 0.875rem; font-weight: bold; margin-bottom: 0.5rem; }
-    .content-html p { margin-bottom: 1rem; }
-    .content-html strong, .content-html b { font-weight: bold; }
-    .content-html em, .content-html i { font-style: italic; }
-    .content-html u { text-decoration: underline; }
-    .content-html s, .content-html strike { text-decoration: line-through; }
-    .content-html code { font-family: monospace; background-color: #f3f4f6; padding: 2px 4px; border-radius: 3px; }
-    .content-html .ql-font-monospace { font-family: monospace; }
-    .content-html .ql-font-serif { font-family: serif; }
-    .content-html .ql-font-sans { font-family: sans-serif; }
-    .content-html .ql-size-small { font-size: 0.75rem; }
-    .content-html .ql-size-large { font-size: 1.25rem; }
-    .content-html .ql-size-huge { font-size: 1.5rem; }
-    .content-html .ql-size-normal { font-size: 1rem; }
-    .content-html .ql-align-left { text-align: left; }
-    .content-html .ql-align-center { text-align: center; }
-    .content-html .ql-align-right { text-align: right; }
-    .content-html .ql-align-justify { text-align: justify; }
-    .content-html ul, .content-html ol { padding-left: 2rem; margin: 1rem 0; }
-    .content-html ul { list-style-type: disc; }
-    .content-html ol { list-style-type: decimal; }
-    .content-html li { margin-bottom: 0.5rem; }
-    .content-html blockquote {
-        border-left: 4px solid #ccc;
-        padding-left: 1rem;
-        color: #555;
-        font-style: italic;
-        margin: 1rem 0;
-    }
-    .content-html a { color: #1d4ed8; text-decoration: underline; }
-    .content-html a:hover { color: #2563eb; }
-    .content-html img {
-        max-width: 100%;
-        height: auto;
-        border: 1px solid #e5e7eb;
-        border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin: 1rem auto;
-        display: block;
-    }
+/* Konten HTML */
+.content-html {
+    max-width: 100%;
+    color: #000000;
+    line-height: 1.7;
+    font-family: sans-serif;
+}
+.content-html h1 { font-size: 2rem; font-weight: bold; margin-bottom: 1rem; }
+.content-html h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 0.75rem; }
+.content-html h3 { font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5rem; }
+.content-html h4 { font-size: 1.125rem; font-weight: bold; margin-bottom: 0.5rem; }
+.content-html h5 { font-size: 1rem; font-weight: bold; margin-bottom: 0.5rem; }
+.content-html h6 { font-size: 0.875rem; font-weight: bold; margin-bottom: 0.5rem; }
+.content-html p { margin-bottom: 1rem; }
+.content-html strong, .content-html b { font-weight: bold; }
+.content-html em, .content-html i { font-style: italic; }
+.content-html u { text-decoration: underline; }
+.content-html s, .content-html strike { text-decoration: line-through; }
+.content-html code { font-family: monospace; background-color: #f3f4f6; padding: 2px 4px; border-radius: 3px; }
 
+/* List */
+.content-html ul, .content-html ol { padding-left: 2rem; margin: 1rem 0; }
+.content-html ul { list-style-type: disc; }
+.content-html ol { list-style-type: decimal; }
+.content-html li { margin-bottom: 0.5rem; }
 
-/* Gallery images */
-.gallery-image { width: 100%; height: auto; object-fit: contain; border-radius: 6px; transition: transform 0.3s ease; }
-.gallery-image:hover { transform: scale(1.05); }
+/* Blockquote */
+.content-html blockquote {
+    border-left: 4px solid #ccc;
+    padding-left: 1rem;
+    color: #555;
+    font-style: italic;
+    margin: 1rem 0;
+}
+
+/* Link */
+.content-html a { color: #1d4ed8; text-decoration: underline; }
+.content-html a:hover { color: #2563eb; }
+
+/* Image */
+.content-html img, .gallery-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: block;
+    margin: 1rem auto;
+    object-fit: contain;
+}
 
 /* Download button */
-.download-btn { display: inline-block; background-color: #3b82f6; color: #fff; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; margin-top: 0.5rem; }
+.download-btn {
+    display: inline-block;
+    background-color: #3b82f6;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    margin-top: 0.5rem;
+}
 .download-btn:hover { background-color: #2563eb; }
 
 /* File viewer */
 iframe.file-viewer { width: 100%; height: 75vh; max-height: 600px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 0.5rem; }
 .fallback { background: #f9fafb; border: 1px dashed #ccc; padding: 1rem; border-radius: 6px; text-align: center; color: #666; margin-bottom: 0.5rem; }
 
-/* Video wrappers */
-.video-embed-wrapper { width: 100%; position: relative; }
-.video-embed-wrapper iframe, .video-embed-wrapper video { position: absolute; top:0; left:0; width:100%; height:100%; border:0; border-radius: 6px; }
-.aspect-16-9 { padding-bottom: 56.25%; height: 0; } /* 16:9 */
-.aspect-9-16 { padding-bottom: 177.78%; height: 0; } /* 9:16 portrait */
+/* Video wrapper umum */
+.video-embed-wrapper {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 6px;
+}
 
-@media (max-width: 768px) { .hero-video { height: 60vh; } }
+/* Aspect ratio 16:9 untuk YouTube / video horizontal */
+.video-embed-wrapper.aspect-16-9 {
+    padding-bottom: 56.25%;
+}
+.video-embed-wrapper.aspect-16-9 iframe,
+.video-embed-wrapper.aspect-16-9 video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* Portrait video untuk Instagram / TikTok */
+/* Portrait video untuk Instagram / TikTok */
+.video-embed-wrapper.portrait {
+    width: 100%;
+    max-width: 400px; /* desktop tetap maksimal 400px */
+    aspect-ratio: 9 / 16; /* portrait 9:16 */
+    margin: 0 auto;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.video-embed-wrapper.portrait iframe,
+.video-embed-wrapper.portrait video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* gunakan contain jika ingin seluruh video terlihat */
+    display: block;
+    border-radius: 6px;
+}
+
+/* Responsive untuk tablet & mobile */
+@media (max-width: 1024px) {
+    .video-embed-wrapper.portrait { max-width: 100%; } /* isi penuh container */
+}
+@media (max-width: 768px) {
+    .video-embed-wrapper.portrait { max-width: 100%; } /* isi penuh container */
+}
+
+
+
 </style>
 @endsection
 
@@ -123,7 +168,7 @@ iframe.file-viewer { width: 100%; height: 75vh; max-height: 600px; border: 1px s
                     @foreach($block->photos as $photo)
                         @if($photo)
                             <div class="w-full flex justify-center">
-                                <img src="{{ Storage::url($photo) }}" class="rounded-lg shadow" style="width:100%;height:auto;object-fit:contain;">
+                                <img src="{{ Storage::url($photo) }}" class="rounded-lg shadow">
                             </div>
                         @endif
                     @endforeach
@@ -166,25 +211,23 @@ iframe.file-viewer { width: 100%; height: 75vh; max-height: 600px; border: 1px s
                     </div>
                 @endif
 
-              {{-- Instagram / TikTok --}}
-@php $portraitLinks = $instagramLinks->merge($tiktokLinks); @endphp
-@if($portraitLinks->isNotEmpty())
-    <h3 class="text-xl font-semibold mt-6 mb-2">Instagram / TikTok Videos</h3>
-    @php
-        $count = $portraitLinks->count();
-        if ($count === 1) $colsClass = 'grid-cols-1 justify-center mt-4';
-        elseif ($count === 2) $colsClass = 'md:grid-cols-2 mt-4';
-        elseif ($count >= 3) $colsClass = 'md:grid-cols-3 mt-4';
-    @endphp
-    <div class="grid gap-6 {{ $colsClass }} justify-items-center">
-        @foreach($portraitLinks as $link)
-            @php $embedLink = convertVideoLink(trim($link)); @endphp
-            <div class="video-embed-wrapper aspect-9-16 w-full max-w-md">
-                <iframe src="{{ $embedLink }}" allowfullscreen></iframe>
-            </div>
-        @endforeach
-    </div>
-@endif
+                {{-- Instagram / TikTok portrait --}}
+                @php $portraitLinks = $instagramLinks->merge($tiktokLinks); @endphp
+                @if($portraitLinks->isNotEmpty())
+                    <h3 class="text-xl font-semibold mt-6 mb-2">Instagram / TikTok Videos</h3>
+                    @php
+                        $count = $portraitLinks->count();
+                        $colsClass = $count === 1 ? 'grid-cols-1' : ($count === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3');
+                    @endphp
+                    <div class="grid gap-6 justify-items-center {{ $colsClass }}">
+                        @foreach($portraitLinks as $link)
+                            @php $embedLink = convertVideoLink(trim($link)); @endphp
+                            <div class="video-embed-wrapper portrait w-full max-w-md">
+                                <iframe src="{{ $embedLink }}" allowfullscreen></iframe>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
 
             @endif
 

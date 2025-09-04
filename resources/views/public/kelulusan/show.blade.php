@@ -56,8 +56,54 @@
         margin: 1rem auto;
         display: block;
     }
-.gallery-image { width: 100%; border-radius: 6px; transition: transform 0.3s ease; }
-.gallery-image:hover { transform: scale(1.05); }
+    .gallery-image {
+    width: 100%;           /* menyesuaikan lebar container/grid */
+    max-width: 400px;      /* ukuran maksimal sama untuk semua foto */
+    height: auto;          /* tetap proporsional */
+    border-radius: 6px;
+    transition: transform 0.3s ease;
+    display: block;
+    margin: 1rem auto;     /* center */
+}
+
+
+.gallery-image:hover {
+    transform: scale(1.03); /* sedikit efek zoom */
+}
+.grid-photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    justify-items: center;
+}
+
+.gallery-image-wrapper {
+    width: 100%;
+    max-width: 450px;    /* ukuran maksimal */
+    /* tinggi otomatis agar tidak memotong gambar */
+    height: auto;
+    overflow: hidden;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.gallery-image-wrapper img {
+    width: 100%;
+    height: auto;         /* jaga proporsi asli */
+    object-fit: contain;  /* tampilkan seluruh gambar tanpa crop */
+    transition: transform 0.3s ease;
+}
+
+.gallery-image-wrapper img:hover {
+    transform: scale(1.03); /* zoom ringan saat hover */
+}
+
+
+
+
 .download-btn { display: inline-block; background-color: #3b82f6; color: #fff; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; margin-top: 0.5rem; }
 .download-btn:hover { background-color: #2563eb; }
 iframe.file-viewer { width: 100%; height: 75vh; max-height: 600px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 0.5rem; }
@@ -66,6 +112,33 @@ iframe.file-viewer { width: 100%; height: 75vh; max-height: 600px; border: 1px s
 .video-embed-wrapper iframe, .video-embed-wrapper video { position: absolute; top:0; left:0; width:100%; height:100%; border:0; border-radius: 6px; }
 .aspect-16-9 { padding-bottom: 56.25%; height: 0; }
 .aspect-9-16 { padding-bottom: 177.78%; height: 0; }
+
+/* Portrait video Instagram / TikTok */
+.video-embed-wrapper.portrait {
+    width: 100%;
+    max-width: 400px; /* bisa diubah sesuai kebutuhan */
+    aspect-ratio: 9 / 16;
+    margin: 0 auto;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.video-embed-wrapper.portrait iframe,
+.video-embed-wrapper.portrait video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 6px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .video-embed-wrapper.portrait { max-width: 100%; }
+}
+@media (max-width: 768px) {
+    .video-embed-wrapper.portrait { max-width: 100%; }
+}
+
 </style>
 @endsection
 
@@ -100,16 +173,16 @@ iframe.file-viewer { width: 100%; height: 75vh; max-height: 600px; border: 1px s
 
             {{-- Foto --}}
             @if(!empty($block['photos']) && is_array($block['photos']))
-                <div class="grid gap-4 mt-4" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
-                    @foreach($block['photos'] as $photo)
-                        @if($photo)
-                            <div class="w-full flex justify-center">
-                                <img src="{{ Storage::url($photo) }}" class="gallery-image shadow">
-                            </div>
-                        @endif
-                    @endforeach
+            <div class="grid-photos mt-4">
+                @foreach($block['photos'] as $photo)
+                <div class="gallery-image-wrapper">
+                    <img src="{{ Storage::url($photo) }}" alt="Foto Galeri">
                 </div>
-            @endif
+                @endforeach
+            </div>
+
+        @endif
+
 
             <!-- Video Lokal -->
 @if(!empty($block['videos']) && is_array($block['videos']))
@@ -142,38 +215,46 @@ iframe.file-viewer { width: 100%; height: 75vh; max-height: 600px; border: 1px s
 @endif
 @endif
 
-            {{-- Video Link --}}
-            @if(!empty($block['videos_link']) && is_array($block['videos_link']))
-                @php
-                    $youtubeLinks = collect($block['videos_link'])->filter(fn($l) => str_contains($l,'youtube.com') || str_contains($l,'youtu.be'));
-                    $instagramLinks = collect($block['videos_link'])->filter(fn($l) => str_contains($l,'instagram.com'));
-                    $tiktokLinks = collect($block['videos_link'])->filter(fn($l) => str_contains($l,'tiktok.com'));
-                    $portraitLinks = $instagramLinks->merge($tiktokLinks);
-                @endphp
+           {{-- Video Link --}}
+@if(!empty($block['videos_link']) && is_array($block['videos_link']))
+@php
+    $youtubeLinks = collect($block['videos_link'])->filter(fn($l) => str_contains($l,'youtube.com') || str_contains($l,'youtu.be'));
+    $instagramLinks = collect($block['videos_link'])->filter(fn($l) => str_contains($l,'instagram.com'));
+    $tiktokLinks = collect($block['videos_link'])->filter(fn($l) => str_contains($l,'tiktok.com'));
+    $portraitLinks = $instagramLinks->merge($tiktokLinks);
+@endphp
 
-                {{-- YouTube Videos --}}
-                @if($youtubeLinks->isNotEmpty())
-                    <h3 class="text-xl font-semibold mt-6 mb-2">YouTube Videos</h3>
-                    <div class="grid gap-6 justify-items-center md:grid-cols-3">
-                        @foreach($youtubeLinks as $link)
-                            <div class="video-embed-wrapper aspect-16-9 w-full">
-                                <iframe src="{{ convertVideoLink($link) }}" allowfullscreen></iframe>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
+{{-- YouTube --}}
+@if($youtubeLinks->isNotEmpty())
+    <h3 class="text-xl font-semibold mt-6 mb-2">YouTube Videos</h3>
+    <div class="grid gap-6 justify-items-center
+        @if($youtubeLinks->count()===2) md:grid-cols-2
+        @elseif($youtubeLinks->count()>=3) md:grid-cols-3 @endif">
+        @foreach($youtubeLinks as $link)
+            <div class="video-embed-wrapper aspect-16-9 w-full">
+                <iframe src="{{ convertVideoLink($link) }}" allowfullscreen></iframe>
+            </div>
+        @endforeach
+    </div>
+@endif
 
-                @if($portraitLinks->isNotEmpty())
-                    <h3 class="text-xl font-semibold mt-6 mb-2">Instagram / TikTok Videos</h3>
-                    <div class="grid gap-6 justify-items-center md:grid-cols-3">
-                        @foreach($portraitLinks as $link)
-                            <div class="video-embed-wrapper aspect-9-16 w-full">
-                                <iframe src="{{ convertVideoLink($link) }}" allowfullscreen></iframe>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
-            @endif
+{{-- Instagram / TikTok (portrait) --}}
+@if($portraitLinks->isNotEmpty())
+    <h3 class="text-xl font-semibold mt-6 mb-2">Instagram / TikTok Videos</h3>
+    @php
+        $count = $portraitLinks->count();
+        $colsClass = $count === 1 ? 'grid-cols-1 justify-items-center' : ($count === 2 ? 'md:grid-cols-2 justify-items-center' : 'md:grid-cols-3 justify-items-start');
+    @endphp
+    <div class="grid gap-6 {{ $colsClass }}">
+        @foreach($portraitLinks as $link)
+            <div class="video-embed-wrapper portrait w-full max-w-md">
+                <iframe src="{{ convertVideoLink(trim($link)) }}" allowfullscreen></iframe>
+            </div>
+        @endforeach
+    </div>
+@endif
+@endif
+
 
             {{-- Files --}}
             @if(!empty($block['files']) && is_array($block['files']))
