@@ -23,7 +23,39 @@
     .content-html u { text-decoration: underline; }
     .content-html s, .content-html strike { text-decoration: line-through; }
     .content-html code { font-family: monospace; background-color: #f3f4f6; padding: 2px 4px; border-radius: 3px; }
-
+    .content-html .ql-font-monospace { font-family: monospace; }
+    .content-html .ql-font-serif { font-family: serif; }
+    .content-html .ql-font-sans { font-family: sans-serif; }
+    .content-html .ql-size-small { font-size: 0.75rem; }
+    .content-html .ql-size-large { font-size: 1.25rem; }
+    .content-html .ql-size-huge { font-size: 1.5rem; }
+    .content-html .ql-size-normal { font-size: 1rem; }
+    .content-html .ql-align-left { text-align: left; }
+    .content-html .ql-align-center { text-align: center; }
+    .content-html .ql-align-right { text-align: right; }
+    .content-html .ql-align-justify { text-align: justify; }
+    .content-html ul, .content-html ol { padding-left: 2rem; margin: 1rem 0; }
+    .content-html ul { list-style-type: disc; }
+    .content-html ol { list-style-type: decimal; }
+    .content-html li { margin-bottom: 0.5rem; }
+    .content-html blockquote {
+        border-left: 4px solid #ccc;
+        padding-left: 1rem;
+        color: #555;
+        font-style: italic;
+        margin: 1rem 0;
+    }
+    .content-html a { color: #1d4ed8; text-decoration: underline; }
+    .content-html a:hover { color: #2563eb; }
+    .content-html img {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin: 1rem auto;
+        display: block;
+    }
 .gallery-image-wrapper {
     width: 100%;
     max-width: 450px;
