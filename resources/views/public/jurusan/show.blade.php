@@ -6,12 +6,16 @@
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
 <style>
-    .content-html {
-        max-width: 100%;
-        color: #000000;
-        line-height: 1.7;
-        font-family: sans-serif;
-    }
+  .content-html {
+    max-width: 100%;
+    color: #000000;
+    line-height: 1.7;
+    font-family: sans-serif;
+    word-wrap: break-word;       /* ✅ teks panjang turun */
+    overflow-wrap: break-word;   /* ✅ teks panjang turun */
+    white-space: normal;         /* ✅ biar responsif */
+}
+
     .content-html h1 { font-size: 2rem; font-weight: bold; margin-bottom: 1rem; }
     .content-html h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 0.75rem; }
     .content-html h3 { font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5rem; }
@@ -140,45 +144,50 @@
                         <div class="content-html">{!! $content !!}</div>
                     @endif
 
-                    {{-- Galeri Foto --}}
-                    @if(!empty($photos) && is_array($photos))
-                        @php $totalPhotos = count($photos); @endphp
-                        @if($totalPhotos === 1)
-                            <div class="relative flex justify-center mt-4">
-                                <div class="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-sm px-2 py-1 rounded">1</div>
-                                <img src="{{ Storage::url($photos[0]) }}" alt="{{ $label }} Foto"
-                                     class="max-w-2xl w-full object-contain rounded-lg shadow"
-                                     loading="lazy" data-aos="zoom-in">
-                            </div>
-                            @if(!empty($photosText))
-                                <div class="content-html mt-4">
-                                    {!! $photosText !!}
-                                </div>
-                            @endif
-                        @else
-                            <div class="grid mt-4 gap-4
-                                @if($totalPhotos > 4) grid-cols-4
-                                @elseif($totalPhotos === 2) grid-cols-2
-                                @elseif($totalPhotos === 3) grid-cols-3
-                                @else grid-cols-{{ $totalPhotos }} @endif">
-                                @foreach($photos as $index => $photo)
-                                    <div class="relative flex flex-col items-center">
-                                        <div class="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-sm px-2 py-1 rounded z-10">
-                                            {{ $index + 1 }}
-                                        </div>
-                                        <img src="{{ Storage::url($photo) }}" alt="{{ $label }} Foto"
-                                             class="gallery-image"
-                                             loading="lazy" data-aos="zoom-in" data-aos-delay="{{ $loop->index * 100 }}">
-                                    </div>
-                                @endforeach
-                                @if(!empty($photosText))
-                                    <div class="content-html col-span-full mt-4">
-                                        {!! $photosText !!}
-                                    </div>
-                                @endif
-                            </div>
-                        @endif
-                    @endif
+                   {{-- Galeri Foto --}}
+@if(!empty($photos) && is_array($photos))
+@php $totalPhotos = count($photos); @endphp
+@if($totalPhotos === 1)
+    <div class="relative flex justify-center mt-4">
+        <div class="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-sm px-2 py-1 rounded">1</div>
+        <img src="{{ Storage::url($photos[0]) }}" alt="{{ $label }} Foto"
+             class="max-w-2xl w-full object-contain rounded-lg shadow"
+             loading="lazy" data-aos="zoom-in">
+    </div>
+    @if(!empty($photosText))
+        <div class="content-html mt-4">
+            {!! $photosText !!}
+        </div>
+    @endif
+@else
+    <div class="grid mt-4 gap-4
+        @if($label === 'Tim Pengajar')
+            grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4
+        @else
+            @if($totalPhotos > 4) grid-cols-4
+            @elseif($totalPhotos === 2) grid-cols-2
+            @elseif($totalPhotos === 3) grid-cols-3
+            @else grid-cols-{{ $totalPhotos }} @endif
+        @endif">
+        @foreach($photos as $index => $photo)
+            <div class="relative flex flex-col items-center">
+                <div class="absolute top-2 left-2 bg-black bg-opacity-50 text-white text-sm px-2 py-1 rounded z-10">
+                    {{ $index + 1 }}
+                </div>
+                <img src="{{ Storage::url($photo) }}" alt="{{ $label }} Foto"
+                     class="gallery-image"
+                     loading="lazy" data-aos="zoom-in" data-aos-delay="{{ $loop->index * 100 }}">
+            </div>
+        @endforeach
+        @if(!empty($photosText))
+            <div class="content-html col-span-full mt-4">
+                {!! $photosText !!}
+            </div>
+        @endif
+    </div>
+@endif
+@endif
+
 
                     {{-- Files --}}
                     @if(!empty($files) && is_array($files))

@@ -12,6 +12,17 @@
         line-height: 1.7;
         font-family: sans-serif;
     }
+    .content-html pre,
+.content-html code {
+    white-space: pre-wrap;   /* wrap teks yang panjang */
+    word-wrap: break-word;   /* memecah kata panjang */
+    font-family: monospace;  /* tetap monospace */
+    background-color: #f3f4f6;
+    padding: 0.5rem;
+    border-radius: 6px;
+    overflow-x: auto;        /* scroll horizontal jika terlalu panjang */
+}
+
     .content-html h1 { font-size: 2rem; font-weight: bold; margin-bottom: 1rem; }
     .content-html h2 { font-size: 1.5rem; font-weight: bold; margin-bottom: 0.75rem; }
     .content-html h3 { font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5rem; }
