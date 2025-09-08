@@ -1,3 +1,5 @@
+
+
 <!-- Footer -->
 <footer class="bg-gray-900 text-white pt-10 pb-6 mt-auto">
     <div class="container mx-auto px-5 max-w-6xl">
@@ -37,36 +39,47 @@
                 </div>
             </div>
 
-            <!-- Facebook Info -->
-            <div class="mb-6">
-                <h5 class="text-xl font-bold border-b-2 border-green-500 pb-2 mb-4">Halaman Resmi Facebook</h5>
-                <div class="bg-gray-800 border-2 border-dashed border-red-500 rounded-lg p-5 h-72 flex flex-col justify-center items-center text-center">
-                    <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
-                    <h5 class="text-red-500 font-bold text-lg mb-3">Koneksi Tidak Aman</h5>
-                    <p class="text-gray-400 mb-4">Widget Facebook tidak dapat dimuat karena masalah keamanan koneksi.</p>
-                    <a href="https://www.facebook.com/SMKNegeri1SubangResmi" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors">
-                        <i class="fab fa-facebook-f mr-2"></i> Kunjungi Halaman Kami
-                    </a>
-                </div>
-            </div>
+          <!-- Facebook Info -->
+<div class="mb-6">
+    <h5 class="text-xl font-bold border-b-2 border-green-500 pb-2 mb-4">
+        Halaman Resmi Facebook
+    </h5>
+
+    <div id="fb-root"></div>
+<script async defer crossorigin="anonymous"
+    src="https://connect.facebook.net/id_ID/sdk.js#xfbml=1&version=v17.0" nonce="XYZ"></script>
+
+<div class="fb-page"
+    data-href="https://www.facebook.com/officialsmkn1subang"
+    data-tabs="timeline"
+    data-width=""
+    data-height=""
+    data-small-header="false"
+    data-adapt-container-width="true"
+    data-hide-cover="false"
+    data-show-facepile="true">
+</div>
+
+</div>
 
             <!-- Statistik & Sosial Media -->
             <div class="mb-6">
-                <h5 class="text-xl font-bold border-b-2 border-green-500 pb-2 mb-4">Statistik Website</h5>
-                <div class="mb-6">
+                 <h5 class="text-xl font-bold border-b-2 border-green-500 pb-2 mb-4">Statistik Website</h5>
+                 <div class="mb-6">
                     <div class="flex justify-between mb-2">
                         <span>Pengunjung Hari Ini:</span>
-                        <strong>22</strong>
+                        <strong>{{ $hariIni }}</strong>
                     </div>
                     <div class="flex justify-between mb-2">
                         <span>Total Pengunjung:</span>
-                        <strong>92,488</strong>
+                        <strong>{{ number_format($totalPengunjung) }}</strong>
                     </div>
                     <div class="flex justify-between">
                         <span>Total Tampilan Halaman:</span>
-                        <strong>134,406</strong>
+                        <strong>{{ number_format($totalHalaman) }}</strong>
                     </div>
                 </div>
+
 
                 <h5 class="text-xl font-bold border-b-2 border-green-500 pb-2 mb-4 mt-6">Sosial Media</h5>
                 <div class="flex space-x-4">

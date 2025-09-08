@@ -43,15 +43,16 @@
         </div>
 
         <!-- Search Bar: mobile (tengah) -->
-        <div class="flex-grow px-2 md:hidden">
+        <form action="{{ route('search') }}" method="GET" class="flex-grow px-2 md:hidden">
             <div class="relative text-gray-700 w-full max-w-md mx-auto">
-                <input type="text" placeholder="Cari di website..."
-                    class="w-full pl-10 pr-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
+                <input type="text" name="q" placeholder="Cari di website..."
+                    class="w-full pl-10 pr-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                    value="{{ request('q') }}">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3">
                     <i class="fas fa-search text-gray-500"></i>
                 </div>
             </div>
-        </div>
+        </form>
 
         <!-- Hamburger Menu: mobile only -->
         <div class="flex-shrink-0 md:hidden">
@@ -172,16 +173,17 @@
         </ul>
 
         <!-- Search Bar: desktop only (kanan) -->
-        <div class="hidden md:block ml-auto">
-            <div class="relative text-gray-700 w-full max-w-xs">
-                <input type="text" placeholder="Cari di website..."
-                    class="w-full pl-10 pr-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm">
+        <form action="{{ route('search') }}" method="GET" class="hidden md:block ml-auto">
+            <div class="relative text-gray-700 w-full max-w-md mx-auto">
+                <input type="text" name="q" placeholder="Cari di website..."
+                    class="w-full pl-10 pr-3 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                    value="{{ request('q') }}">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3">
                     <i class="fas fa-search text-gray-500"></i>
                 </div>
             </div>
-        </div>
-    </div>
+        </form>
+
 
     <!-- MOBILE MENU WRAPPER -->
     <div id="mobile-wrapper" class="fixed inset-0 z-50 bg-black/50 hidden">
@@ -200,34 +202,48 @@
                     <li class="py-4 border-b border-white/30">
                         <a href="{{ route('beranda') }}" class="hover:text-green-400">Beranda</a>
                     </li>
+
+                    {{-- Profil --}}
                     <li class="py-4 border-b border-white/30">
                         <button onclick="openSubmenu('profil')" class="w-full text-left hover:text-green-400">
                             Profil <i class="fas fa-chevron-right float-right"></i>
                         </button>
                     </li>
+
+                    {{-- Kompetensi Keahlian --}}
                     <li class="py-4 border-b border-white/30">
                         <button onclick="openSubmenu('kompetensi')" class="w-full text-left hover:text-green-400">
                             Kompetensi Keahlian <i class="fas fa-chevron-right float-right"></i>
                         </button>
                     </li>
+
+                    {{-- IKM --}}
                     <li class="py-4 border-b border-white/30">
                         <button onclick="openSubmenu('ikm')" class="w-full text-left hover:text-green-400">
                             Implementasi IKM <i class="fas fa-chevron-right float-right"></i>
                         </button>
                     </li>
 
+                    {{-- Galeri --}}
                     <li class="py-4 border-b border-white/30">
-                        <a href="#" class="hover:text-green-400">Galeri</a>
+                        <a href="{{ $firstGaleri ? route('galeri.show', ['slug' => $firstGaleri->slug]) : '#' }}"
+                           class="hover:text-green-400">Galeri</a>
                     </li>
+
+                    {{-- Kelulusan --}}
                     <li class="py-4 border-b border-white/30">
-                        <a href="#" class="hover:text-green-400">Kelulusan</a>
+                        <a href="{{ $firstKelulusan ? route('kelulusan.show', ['slug' => $firstKelulusan->slug]) : '#' }}"
+                           class="hover:text-green-400">Kelulusan</a>
                     </li>
+
+                    {{-- Lainnya --}}
                     <li class="py-4 border-b border-white/30">
                         <button onclick="openSubmenu('lainnya')" class="w-full text-left hover:text-green-400">
                             Lainnya <i class="fas fa-chevron-right float-right"></i>
                         </button>
                     </li>
                 </ul>
+
             </div>
         </div>
 
@@ -289,30 +305,25 @@
                 </button>
             </div>
             <ul class="font-semibold text-base text-white/80">
-                <li class="py-4 border-b border-white/30">
-                    <a href="#" class="block hover:text-green-400">BKK</a>
-                </li>
-                <li class="py-4 border-b border-white/30">
-                    <a href="#" class="block hover:text-green-400">SPW</a>
-                </li>
-                <li class="py-4 border-b border-white/30">
-                    <a href="#" class="block hover:text-green-400">TEFA</a>
-                </li>
-                <li class="py-4 border-b border-white/30">
-                    <a href="#" class="block hover:text-green-400">SPMB</a>
-                </li>
+                @if(!empty($menus))
+                    @foreach($menus as $title => $slug)
+                        <li class="py-4 border-b border-white/30">
+                            <a href="{{ route('lainnya.show', $slug) }}" class="block hover:text-green-400">
+                                {{ $title }}
+                            </a>
+                        </li>
+                    @endforeach
+                @else
+                    <li class="py-4 border-b border-white/30 text-gray-400">Menu kosong</li>
+                @endif
+
                 <li class="py-4 border-b border-white/30">
                     <a href="{{ route('informasi.index') }}" class="block hover:text-green-400">
                         Informasi Terbaru
                     </a>
                 </li>
-
-                <li class="py-4 border-b border-white/30">
-                    <button onclick="openSubmenu('layanan')" class="w-full text-left hover:text-green-400">
-                        Layanan TU <i class="fas fa-chevron-right float-right"></i>
-                    </button>
-                </li>
             </ul>
+
         </div>
 
         <!-- SUBMENU: LAYANAN -->

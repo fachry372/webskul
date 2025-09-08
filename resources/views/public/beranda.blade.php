@@ -210,6 +210,80 @@
     </section>
 
 
+<!-- Garis Pemisah Atas -->
+<div class="w-full border-t border-gray-300 my-12"></div>
+
+<!-- Section Video + Statistik -->
+<section class="w-full py-12 px-4 md:px-8 bg-gradient-to-b from-blue-50 to-white">
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Judul Section -->
+        <div class="text-center mb-10">
+            <h2 class="text-3xl md:text-4xl font-bold text-blue-800">Selamat Datang di Profil Sekolah Kami</h2>
+            <p class="mt-3 text-gray-600 max-w-2xl mx-auto">
+                Kami berkomitmen mencetak generasi yang berkarakter, berprestasi, dan siap menghadapi tantangan masa depan.
+                Saksikan video perkenalan singkat serta data penting tentang sekolah kami.
+            </p>
+        </div>
+
+        <!-- Video Full -->
+        <div class="relative w-full aspect-video rounded-2xl overflow-hidden shadow-xl mb-12">
+            <iframe class="w-full h-full"
+                src="https://www.youtube.com/embed/aSCdFpJMhyE?rel=0&modestbranding=1&playsinline=1"
+                title="Video Profil Sekolah"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <!-- Statistik Sekolah -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+
+            <!-- Box 1 -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center justify-center hover:scale-105 transition">
+                <div class="bg-blue-100 text-blue-600 w-16 h-16 flex items-center justify-center rounded-full mb-4 text-3xl font-bold">
+                    👨‍🎓
+                </div>
+                <h3 class="text-4xl font-extrabold text-blue-800">1.250+</h3>
+                <p class="mt-2 text-gray-600">Siswa Aktif</p>
+            </div>
+
+            <!-- Box 2 -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center justify-center hover:scale-105 transition">
+                <div class="bg-green-100 text-green-600 w-16 h-16 flex items-center justify-center rounded-full mb-4 text-3xl font-bold">
+                    👩‍🏫
+                </div>
+                <h3 class="text-4xl font-extrabold text-green-700">85</h3>
+                <p class="mt-2 text-gray-600">Guru & Tenaga Pendidik</p>
+            </div>
+
+            <!-- Box 3 -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center justify-center hover:scale-105 transition">
+                <div class="bg-yellow-100 text-yellow-600 w-16 h-16 flex items-center justify-center rounded-full mb-4 text-3xl font-bold">
+                    🎨
+                </div>
+                <h3 class="text-4xl font-extrabold text-yellow-700">20+</h3>
+                <p class="mt-2 text-gray-600">Ekstrakurikuler Aktif</p>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+
+
+
+<!-- Garis Pemisah Bawah -->
+<div class="w-full border-t border-gray-300 my-12"></div>
+
+
+
+
+
+
     @php
 use Illuminate\Support\Str;
 @endphp
@@ -264,7 +338,8 @@ use Illuminate\Support\Str;
     <h2 class="text-3xl font-bold text-gray-900 mb-4 text-center">Testimoni Alumni</h2>
 
     <!-- Slider Container (mengisi ruang) -->
-    <div class="space-y-6 h-56 overflow-hidden relative w-full flex-1" id="testimonial-slider">
+    <div class="space-y-6 min-h-[250px] overflow-hidden relative w-full flex-1" id="testimonial-slider">
+
         <div class="testimonial-item absolute inset-0 transition-all opacity-100 flex flex-col justify-center">
             <p class="text-gray-700 mb-3 line-clamp-3">
                 "SMK Negeri 1 Subang benar-benar membekali saya dengan keterampilan dan karakter yang dibutuhkan untuk dunia kerja. Guru-guru profesional dan suasana belajar menyenangkan!"
@@ -288,11 +363,34 @@ use Illuminate\Support\Str;
 </div>
 
 
-        <!-- Kotak Saran (Kanan) -->
-        <div class="md:flex-1 bg-gray-100 rounded-xl shadow-lg p-8 flex flex-col justify-start">
+
+       <!-- Kotak Saran (Kanan) -->
+<div id="saran-section" class="md:flex-1 bg-gray-100 rounded-xl shadow-lg p-8 flex flex-col justify-start">
+
+
             <h2 class="text-3xl font-bold text-gray-900 mb-4 text-center">Saran & Masukan</h2>
 
-            <form action="#" method="POST" class="space-y-4 flex flex-col w-full max-w-md mx-auto">
+            {{-- Alert Success --}}
+            @if(session('success'))
+                <div class="bg-green-500 text-white p-3 rounded mb-6 text-center shadow-md">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            {{-- Alert Error --}}
+            @if($errors->any())
+                <div class="bg-red-500 text-white p-3 rounded mb-6 shadow-md">
+                    <ul class="list-disc list-inside text-left">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+
+
+            <form action="{{ route('saran.store') }}" method="POST" class="space-y-4 flex flex-col w-full max-w-md mx-auto">
                 @csrf
                 <div>
                     <label for="nama" class="block text-gray-700 font-semibold mb-1 ">Nama</label>

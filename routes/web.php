@@ -21,10 +21,18 @@ use App\Http\Controllers\PublicInformasiController;
 use App\Http\Controllers\LainnyaController;
 use App\Http\Controllers\LainnyaKontenController;
 use App\Http\Controllers\PublicLainnyaController;
-
+use App\Http\Controllers\SaranController;
+use App\Http\Controllers\StatistikController;
 
 Route::get('/', [BerandaController::class, 'index'])->name('beranda');
 Route::get('/beranda', [BerandaController::class, 'index']);
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
 
 // ✅ Route admin utama
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -80,6 +88,9 @@ Route::resource('admin/kategori', KategoriInformasiController::class);
 
 Route::resource('lainnya', LainnyaController::class);
 Route::resource('lainnya_konten', LainnyaKontenController::class);
+
+Route::get('/saran', [SaranController::class, 'index'])->name('saran.index');
+
     });
 });
 
@@ -95,6 +106,13 @@ Route::get('/informasi', [PublicInformasiController::class, 'index'])->name('inf
 Route::get('/informasi/{slug}', [PublicInformasiController::class, 'show'])->name('informasi.show');
 
 Route::get('/lainnya/{slug}', [PublicLainnyaController::class, 'show'])->name('lainnya.show');
+
+Route::post('/saran', [SaranController::class, 'store'])->name('saran.store');
+
+Route::get('/', [StatistikController::class, 'index'])->name('beranda');
+
+// routes/web.php
+Route::get('/search', [App\Http\Controllers\SearchController::class, 'index'])->name('search');
 
 // ✅ Route auth Breeze
 require __DIR__.'/auth.php';

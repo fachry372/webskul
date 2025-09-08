@@ -436,6 +436,22 @@
     </div>
 </div>
 
+{{-- Dropdown Saran --}}
+<div class="relative mb-2" x-data="{ open: {{ request()->routeIs('admin.saran.*') ? 'true' : 'false' }} }">
+    <a href="{{ route('admin.saran.index') }}"
+       class="relative flex items-center pl-5 py-3 w-full rounded hover:bg-gray-300 transition text-lg
+              {{ request()->routeIs('admin.saran.*') ? 'active' : '' }}">
+       <span class="flex items-center">
+           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                     d="M9 12h6m2 0a2 2 0 100-4H7a2 2 0 100 4m10 0a2 2 0 11-4 0m-2 0a2 2 0 11-4 0" />
+           </svg>
+           Saran & Masukan
+       </span>
+    </a>
+</div>
+
+
 
 </div>
 
