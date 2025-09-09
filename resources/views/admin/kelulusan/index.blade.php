@@ -17,6 +17,7 @@
             <tr class="bg-gray-100">
                 <th class="border p-2 text-left">Judul</th>
                 <th class="border p-2 text-left">Slug</th>
+                <th class="border p-2 text-center">Status</th>
                 <th class="border p-2 text-center">Jumlah Block</th>
                 <th class="border p-2 text-center">Aksi</th>
             </tr>
@@ -26,6 +27,17 @@
                 <tr>
                     <td class="border p-2">{{ $kelulusan->judul }}</td>
                     <td class="border p-2">{{ $kelulusan->slug }}</td>
+                    <td class="border p-2 text-center">
+                        @if($kelulusan->status === 'publish')
+                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">
+                                Publish
+                            </span>
+                        @else
+                            <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded text-sm">
+                                Draft
+                            </span>
+                        @endif
+                    </td>
                     <td class="border p-2 text-center">{{ $kelulusan->blocks->count() }}</td>
                     <td class="border p-2 text-center">
                         <a href="{{ route('admin.kelulusan.edit', $kelulusan->id) }}"
@@ -44,7 +56,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="4" class="border p-2 text-center">
+                    <td colspan="5" class="border p-2 text-center">
                         Belum ada kelulusan.
                     </td>
                 </tr>

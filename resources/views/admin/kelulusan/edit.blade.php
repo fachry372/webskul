@@ -44,6 +44,20 @@
             @enderror
         </div>
 
+        {{-- Status Kelulusan --}}
+<div class="mb-4">
+    <label for="status" class="block font-semibold">Status</label>
+    <select name="status" id="status"
+            class="w-full border rounded p-2 @error('status') border-red-500 @enderror" required>
+        <option value="draft" {{ old('status', $kelulusan->status) === 'draft' ? 'selected' : '' }}>Draft</option>
+        <option value="publish" {{ old('status', $kelulusan->status) === 'publish' ? 'selected' : '' }}>Publish</option>
+    </select>
+    @error('status')
+        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+    @enderror
+</div>
+
+
         <div id="blocks-container"></div>
         <button type="button" id="add-block" class="bg-green-600 text-white px-4 py-2 rounded mb-4">Tambah Blok</button>
 

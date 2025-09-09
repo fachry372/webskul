@@ -119,15 +119,18 @@
 
 
         @php
-        $firstKelulusan = \App\Models\Kelulusan::first(); // ambil kelulusan pertama dari DB
+        $firstKelulusan = \App\Models\Kelulusan::where('status', 'publish')->first();
     @endphp
 
-    <li>
-        <a href="{{ $firstKelulusan ? route('kelulusan.show', ['slug' => $firstKelulusan->slug]) : '#' }}"
-           class="{{ request()->routeIs('kelulusan.show') ? 'text-green-500 border-b-2 border-green-500' : 'hover:text-green-500 hover:border-b-2 hover:border-green-500' }} pb-1">
-           Kelulusan
-        </a>
-    </li>
+    @if($firstKelulusan)
+        <li>
+            <a href="{{ route('kelulusan.show', ['slug' => $firstKelulusan->slug]) }}"
+               class="{{ request()->routeIs('kelulusan.show') ? 'text-green-500 border-b-2 border-green-500' : 'hover:text-green-500 hover:border-b-2 hover:border-green-500' }} pb-1">
+               Kelulusan
+            </a>
+        </li>
+    @endif
+
 
          <!-- Lainnya dengan Submenu -->
 <li class="relative group">

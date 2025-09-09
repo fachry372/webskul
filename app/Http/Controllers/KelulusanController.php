@@ -34,16 +34,19 @@ class KelulusanController extends Controller
             $kelulusan = Kelulusan::findOrFail($request->kelulusan_id);
         } else {
             $request->validate([
-                'judul' => 'required|string|max:255|unique:kelulusans,judul',
-                'blocks' => 'nullable|array',
+                'judul'   => 'required|string|max:255|unique:kelulusans,judul',
+                'status'  => 'required|in:draft,publish',
+                'blocks'  => 'nullable|array',
             ]);
 
             $kelulusan = Kelulusan::create([
-                'judul' => $request->judul,
-                'slug' => Str::slug($request->judul),
+                'judul'  => $request->judul,
+                'slug'   => Str::slug($request->judul),
+                'status' => $request->status,
             ]);
         }
 
+        // === Simpan blocks ===
         if ($request->has('blocks')) {
             foreach ($request->blocks as $block) {
                 $photos = [];
@@ -75,12 +78,12 @@ class KelulusanController extends Controller
 
                 KelulusanBlock::create([
                     'kelulusan_id' => $kelulusan->id,
-                    'title' => $block['title'] ?? null,
-                    'text' => $block['text'] ?? null,
-                    'photos' => !empty($photos) ? json_encode($photos) : null,
-                    'videos' => !empty($videos) ? json_encode($videos) : null,
-                    'files' => !empty($files) ? json_encode($files) : null,
-                    'videos_link' => !empty($block['videos_link']) ? json_encode(array_filter($block['videos_link'])) : null,
+                    'title'        => $block['title'] ?? null,
+                    'text'         => $block['text'] ?? null,
+                    'photos'       => !empty($photos) ? json_encode($photos) : null,
+                    'videos'       => !empty($videos) ? json_encode($videos) : null,
+                    'files'        => !empty($files) ? json_encode($files) : null,
+                    'videos_link'  => !empty($block['videos_link']) ? json_encode(array_filter($block['videos_link'])) : null,
                 ]);
             }
         }
@@ -97,16 +100,19 @@ class KelulusanController extends Controller
     public function update(Request $request, Kelulusan $kelulusan)
     {
         $request->validate([
-            'judul' => 'required|string|max:255|unique:kelulusans,judul,' . $kelulusan->id,
+            'judul'  => 'required|string|max:255|unique:kelulusans,judul,' . $kelulusan->id,
+            'status' => 'required|in:draft,publish',
             'blocks' => 'nullable|array',
         ]);
 
-        // Update judul & slug
+        // Update judul, slug & status
         $kelulusan->update([
-            'judul' => $request->judul,
-            'slug' => Str::slug($request->judul),
+            'judul'  => $request->judul,
+            'slug'   => Str::slug($request->judul),
+            'status' => $request->status,
         ]);
 
+        // === Update blocks (kode lama tetap dipakai) ===
         if ($request->has('blocks')) {
             foreach ($request->blocks as $index => $block) {
 
@@ -176,7 +182,6 @@ class KelulusanController extends Controller
 
         return redirect()->route('admin.kelulusan.index')->with('success', 'Kelulusan berhasil diperbarui.');
     }
-
 
     public function destroy(Kelulusan $kelulusan)
     {

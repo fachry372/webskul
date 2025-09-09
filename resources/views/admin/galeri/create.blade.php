@@ -43,7 +43,9 @@
         {{-- Judul Galeri --}}
         <div class="mb-4">
             <label class="block font-semibold">Judul Galeri</label>
-            <input type="text" name="judul" id="judul" class="w-full border rounded p-2 @error('judul') border-red-500 @enderror" value="{{ old('judul') }}" required>
+            <input type="text" name="judul" id="judul"
+                   class="w-full border rounded p-2 @error('judul') border-red-500 @enderror"
+                   value="{{ old('judul') }}" required>
             @error('judul')
                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
             @enderror
@@ -51,13 +53,36 @@
 
         {{-- Container blok --}}
         <div id="blocks-container"></div>
-        <button type="button" id="add-block" class="bg-green-600 text-white px-4 py-2 rounded mb-4" @if(!$canCreateNew) disabled @endif>Tambah Blok</button>
+        <button type="button" id="add-block"
+                class="bg-green-600 text-white px-4 py-2 rounded mb-4"
+                @if(!$canCreateNew) disabled @endif>
+            Tambah Blok
+        </button>
 
-        <div>
-            <button type="submit" id="btnSubmit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700" @if(!$canCreateNew) disabled @endif>Simpan</button>
-            <a href="{{ route('admin.galeri.index') }}" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 ml-2">Batal</a>
+        {{-- Simpan + Kembali sejajar --}}
+        <div class="flex gap-2">
+            <button type="submit" id="btnSubmit"
+                    class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+                    @if(!$canCreateNew) disabled @endif>
+                Simpan
+            </button>
+            <a href="{{ route('admin.galeri.index') }}"
+               class="inline-block bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+                Kembali
+            </a>
         </div>
     </form>
+
+    {{-- Kalau tidak bisa buat galeri baru, hanya tampil tombol kembali --}}
+    @if(!$canCreateNew)
+        <div class="mt-4">
+            <a href="{{ route('admin.galeri.index') }}"
+               class="inline-block bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+                Kembali
+            </a>
+        </div>
+    @endif
+
 </div>
 
 @endsection

@@ -37,27 +37,70 @@
         </div>
     @endif
 
-    <form id="kelulusanCreateForm" action="{{ route('admin.kelulusan.store') }}" method="POST" enctype="multipart/form-data" @if(!$canCreateNew) style="display:none;" @endif>
-        @csrf
+    <form id="kelulusanCreateForm"
+    action="{{ route('admin.kelulusan.store') }}"
+    method="POST"
+    enctype="multipart/form-data"
+    @if(!$canCreateNew) style="display:none;" @endif>
+  @csrf
 
-        {{-- Judul Kelulusan --}}
-        <div class="mb-4">
-            <label class="block font-semibold">Judul Kelulusan</label>
-            <input type="text" name="judul" id="judul" class="w-full border rounded p-2 @error('judul') border-red-500 @enderror" value="{{ old('judul') }}" required>
-            @error('judul')
-                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+  {{-- Judul Kelulusan --}}
+  <div class="mb-4">
+      <label class="block font-semibold">Judul Kelulusan</label>
+      <input type="text" name="judul" id="judul"
+             class="w-full border rounded p-2 @error('judul') border-red-500 @enderror"
+             value="{{ old('judul') }}" required>
+      @error('judul')
+          <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+      @enderror
+  </div>
 
-        {{-- Container blok --}}
-        <div id="blocks-container"></div>
-        <button type="button" id="add-block" class="bg-green-600 text-white px-4 py-2 rounded mb-4" @if(!$canCreateNew) disabled @endif>Tambah Blok</button>
+  {{-- Status Kelulusan --}}
+<div class="mb-4">
+    <label class="block font-semibold">Status</label>
+    <select name="status" id="status"
+            class="w-full border rounded p-2 @error('status') border-red-500 @enderror" required>
+        <option value="draft" {{ old('status') === 'draft' ? 'selected' : '' }}>Draft</option>
+        <option value="publish" {{ old('status') === 'publish' ? 'selected' : '' }}>Publish</option>
+    </select>
+    @error('status')
+        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+    @enderror
+</div>
 
-        <div>
-            <button type="submit" id="btnSubmit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700" @if(!$canCreateNew) disabled @endif>Simpan</button>
-            <a href="{{ route('admin.kelulusan.index') }}" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 ml-2">Batal</a>
-        </div>
-    </form>
+
+  {{-- Container blok --}}
+  <div id="blocks-container"></div>
+  <button type="button" id="add-block"
+          class="bg-green-600 text-white px-4 py-2 rounded mb-4"
+          @if(!$canCreateNew) disabled @endif>
+      Tambah Blok
+  </button>
+
+  {{-- Simpan + Batal sejajar --}}
+  <div class="flex gap-2">
+      <button type="submit" id="btnSubmit"
+              class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+              @if(!$canCreateNew) disabled @endif>
+          Simpan
+      </button>
+      <a href="{{ route('admin.kelulusan.index') }}"
+         class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+         Kembali
+      </a>
+  </div>
+</form>
+
+{{-- Kalau tidak bisa buat kelulusan baru, tetap tampil tombol Batal --}}
+@if(!$canCreateNew)
+  <div class="mt-4">
+      <a href="{{ route('admin.kelulusan.index') }}"
+         class="inline-block bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600">
+         Kembali
+      </a>
+  </div>
+@endif
+
 </div>
 
 @endsection
