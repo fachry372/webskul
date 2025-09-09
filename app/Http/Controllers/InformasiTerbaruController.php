@@ -44,16 +44,16 @@ class InformasiTerbaruController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'judul' => 'required|string|max:255',
+            'judul' => 'required|string|max:255|unique:informasi_terbaru,judul',
             'isi' => 'required|string',
             'kategori_id' => 'required|exists:kategori_informasi,id',
             'status' => 'required|in:draft,publish',
             'tanggal_publish' => 'nullable|date',
             'gambar' => 'nullable|array',
             'gambar.*' => 'image|mimes:jpeg,png,jpg,gif,webp,ico,x-icon|max:2048'
-
+        ], [
+            'judul.unique' => 'Judul informasi sudah digunakan, silakan pilih judul lain.'
         ]);
-
 
         $informasi = InformasiTerbaru::create([
             'judul' => $request->judul,
@@ -63,9 +63,9 @@ class InformasiTerbaruController extends Controller
             'tanggal_publish' => $request->tanggal_publish
         ]);
 
-        if($request->hasFile('gambar')){
-            foreach($request->file('gambar') as $file){
-                if($file && $file->isValid()){
+        if ($request->hasFile('gambar')) {
+            foreach ($request->file('gambar') as $file) {
+                if ($file && $file->isValid()) {
                     $path = $file->store('informasi', 'public');
                     InformasiTerbaruGambar::create([
                         'informasi_id' => $informasi->id,
@@ -78,7 +78,6 @@ class InformasiTerbaruController extends Controller
         return redirect()->route('admin.informasi.index')->with('success','Informasi berhasil dibuat.');
     }
 
-
     public function edit(InformasiTerbaru $informasi)
     {
         $kategoris = KategoriInformasi::all();
@@ -86,54 +85,51 @@ class InformasiTerbaruController extends Controller
     }
 
     public function update(Request $request, InformasiTerbaru $informasi)
-    {
-        $request->validate([
-            'judul' => 'required|string|max:255',
-            'isi' => 'required|string',
-            'kategori_id' => 'required|exists:kategori_informasi,id',
-            'status' => 'required|in:draft,publish',
-            'tanggal_publish' => 'nullable|date',
-            'gambar.*' => 'image|mimes:jpeg,png,jpg,gif,webp,ico|max:2048'
-        ]);
+{
+    $request->validate([
+        'judul' => 'required|string|max:255|unique:informasi_terbaru,judul,' . $informasi->id,
+        'isi' => 'required|string',
+        'kategori_id' => 'required|exists:kategori_informasi,id',
+        'status' => 'required|in:draft,publish',
+        'tanggal_publish' => 'nullable|date',
+        'gambar.*' => 'image|mimes:jpeg,png,jpg,gif,webp,ico|max:2048'
+    ], [
+        'judul.unique' => 'Judul informasi sudah digunakan, silakan pilih judul lain.'
+    ]);
 
-        // Update data informasi
-        $informasi->update([
-            'judul' => $request->judul,
-            'isi' => $request->isi,
-            'kategori_id' => $request->kategori_id,
-            'status' => $request->status,
-            'tanggal_publish' => $request->tanggal_publish
-        ]);
+    $informasi->update([
+        'judul' => $request->judul,
+        'isi' => $request->isi,
+        'kategori_id' => $request->kategori_id,
+        'status' => $request->status,
+        'tanggal_publish' => $request->tanggal_publish
+    ]);
 
-        // Hapus gambar lama yang di-×
-        if($request->filled('delete_gambar')){
-            $ids = explode(',', $request->delete_gambar);
-            foreach($ids as $id){
-                $img = InformasiTerbaruGambar::find($id);
-                if($img){
-                    // Hapus file fisik
-                    if(\Storage::disk('public')->exists($img->nama_file)){
-                        \Storage::disk('public')->delete($img->nama_file);
-                    }
-                    // Hapus dari DB
-                    $img->delete();
+    if ($request->filled('delete_gambar')) {
+        $ids = explode(',', $request->delete_gambar);
+        foreach ($ids as $id) {
+            $img = InformasiTerbaruGambar::find($id);
+            if ($img) {
+                if (\Storage::disk('public')->exists($img->nama_file)) {
+                    \Storage::disk('public')->delete($img->nama_file);
                 }
+                $img->delete();
             }
         }
-
-        // Upload gambar baru
-        if($request->hasFile('gambar')){
-            foreach($request->file('gambar') as $file){
-                $path = $file->store('informasi','public');
-                InformasiTerbaruGambar::create([
-                    'informasi_id' => $informasi->id,
-                    'nama_file' => $path
-                ]);
-            }
-        }
-
-        return redirect()->route('admin.informasi.index')->with('success','Informasi berhasil diupdate.');
     }
+
+    if ($request->hasFile('gambar')) {
+        foreach ($request->file('gambar') as $file) {
+            $path = $file->store('informasi','public');
+            InformasiTerbaruGambar::create([
+                'informasi_id' => $informasi->id,
+                'nama_file' => $path
+            ]);
+        }
+    }
+
+    return redirect()->route('admin.informasi.index')->with('success','Informasi berhasil diupdate.');
+}
 
 
     public function destroy(InformasiTerbaru $informasi)
