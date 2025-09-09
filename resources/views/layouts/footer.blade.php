@@ -83,10 +83,10 @@
 
                 <h5 class="text-xl font-bold border-b-2 border-green-500 pb-2 mb-4 mt-6">Sosial Media</h5>
                 <div class="flex space-x-4">
-                    <a href="https://facebook.com/SMKNegeri1SubangResmi" target="_blank" class="social-icon">
+                    <a href="https://www.facebook.com/officialsmkn1subang" target="_blank" class="social-icon">
                         <i class="fab fa-facebook text-3xl text-white hover:text-blue-500"></i>
                     </a>
-                    <a href="https://instagram.com/smkn1subang" target="_blank" class="social-icon">
+                    <a href="https://www.instagram.com/officialsmkn1subang?igsh=eWZseDA0OXd0NXkw" target="_blank" class="social-icon">
                         <i class="fab fa-instagram text-3xl text-white hover:text-pink-500"></i>
                     </a>
                     <a href="https://www.youtube.com/@NesasCeren" target="_blank" class="social-icon">
