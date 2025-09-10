@@ -9,11 +9,20 @@ use Illuminate\Support\Str;
 class IkmController extends Controller
 {
     // Tampilkan semua IKM
-    public function index()
+    public function index(Request $request)
     {
-        $ikm = Ikm::all();
+        $query = Ikm::query()->latest();
+
+        // Filter pencarian
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        $ikm = $query->paginate(10);
+
         return view('admin.ikm.index', compact('ikm'));
     }
+
 
     // Form tambah IKM
     public function create()

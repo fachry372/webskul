@@ -11,11 +11,23 @@ use Illuminate\Support\Facades\Storage;
 
 class IkmKontenController extends Controller
 {
-    public function index()
-    {
-        $konten = IkmKonten::with('ikm')->latest()->get();
-        return view('admin.ikm_konten.index', compact('konten'));
+    public function index(Request $request)
+{
+    $query = IkmKonten::with('ikm')->latest();
+
+    // Filter pencarian (berdasarkan judul konten atau judul IKM)
+    if ($request->filled('search')) {
+        $query->where('title', 'like', '%' . $request->search . '%')
+              ->orWhereHas('ikm', function ($q) use ($request) {
+                  $q->where('title', 'like', '%' . $request->search . '%');
+              });
     }
+
+    $konten = $query->paginate(10);
+
+    return view('admin.ikm_konten.index', compact('konten'));
+}
+
 
     public function create()
     {

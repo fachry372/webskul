@@ -15,11 +15,19 @@ class ProfileController extends Controller
     // =========================
 
     // Tampilkan semua profile
-    public function index()
-    {
-        $profiles = Profile::with('menus')->get(); // Ambil semua profile beserta menunya
-        return view('admin.profiles.index', compact('profiles'));
+    public function index(Request $request)
+{
+    $query = Profile::with('menus');
+
+    if ($request->filled('search')) {
+        $query->where('title', 'like', '%' . $request->search . '%'); // pakai 'title', bukan 'nama'
     }
+
+    $profiles = $query->paginate(10);
+
+    return view('admin.profiles.index', compact('profiles'));
+}
+
 
     // Form tambah profile
     public function create()

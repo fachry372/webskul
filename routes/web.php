@@ -90,6 +90,8 @@ Route::resource('lainnya', LainnyaController::class);
 Route::resource('lainnya_konten', LainnyaKontenController::class);
 
 Route::get('/saran', [SaranController::class, 'index'])->name('saran.index');
+Route::get('/saran/{saran}', [SaranController::class, 'show'])->name('saran.show');
+
 
     });
 });

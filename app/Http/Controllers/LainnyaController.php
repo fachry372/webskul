@@ -9,9 +9,21 @@ use Illuminate\Support\Str;
 class LainnyaController extends Controller
 {
     // Tampilkan semua menu Lainnya
-    public function index()
+    public function index(Request $request)
     {
-        $lainnya = Lainnya::all();
+        $query = Lainnya::query();
+
+        // Filter pencarian judul/slug
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                  ->orWhere('slug', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Pagination (10 per halaman)
+        $lainnya = $query->latest()->paginate(10);
+
         return view('admin.lainnya.index', compact('lainnya'));
     }
 

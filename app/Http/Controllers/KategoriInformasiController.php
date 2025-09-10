@@ -8,11 +8,22 @@ use Illuminate\Support\Str;
 
 class KategoriInformasiController extends Controller
 {
-    public function index()
-    {
-        $kategoris = KategoriInformasi::latest()->paginate(10);
-        return view('admin.kategori.index', compact('kategoris'));
+    public function index(Request $request)
+{
+    $query = KategoriInformasi::query();
+
+    // Filter pencarian berdasarkan nama kategori
+    if ($request->search) {
+        $query->where('nama', 'like', '%' . $request->search . '%');
     }
+
+
+
+    $kategoris = $query->latest()->paginate(10);
+
+    return view('admin.kategori.index', compact('kategoris'));
+}
+
 
     public function create()
     {

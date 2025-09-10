@@ -12,11 +12,24 @@ use HTMLPurifier_Config;
 
 class PostController extends Controller
 {
-    public function index()
-    {
-        $posts = Post::with('jurusan')->latest()->get();
-        return view('admin.posts.index', compact('posts'));
+    public function index(Request $request)
+{
+    $query = Post::with('jurusan')->latest();
+
+    // Filter pencarian (judul post atau nama jurusan)
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where('title', 'like', '%' . $search . '%')
+              ->orWhereHas('jurusan', function ($q) use ($search) {
+                  $q->where('name', 'like', '%' . $search . '%');
+              });
     }
+
+    $posts = $query->paginate(10);
+
+    return view('admin.posts.index', compact('posts'));
+}
+
     public function create()
     {
         // Ambil jurusan yang belum memiliki post

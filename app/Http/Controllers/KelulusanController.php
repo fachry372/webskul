@@ -9,11 +9,27 @@ use Illuminate\Support\Str;
 
 class KelulusanController extends Controller
 {
-    public function index()
-    {
-        $kelulusans = Kelulusan::latest()->get();
-        return view('admin.kelulusan.index', compact('kelulusans'));
+    public function index(Request $request)
+{
+    $query = Kelulusan::query();
+
+    // === Filter pencarian ===
+    if ($request->filled('search')) {
+        $query->where('judul', 'like', '%' . $request->search . '%')
+              ->orWhere('slug', 'like', '%' . $request->search . '%');
     }
+
+    // === Filter status ===
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    // Urutkan terbaru + paginate
+    $kelulusans = $query->latest()->paginate(10)->withQueryString();
+
+    return view('admin.kelulusan.index', compact('kelulusans'));
+}
+
 
     public function create()
     {

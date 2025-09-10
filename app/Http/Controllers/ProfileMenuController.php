@@ -9,11 +9,22 @@ use Illuminate\Support\Facades\Storage;
 
 class ProfileMenuController extends Controller
 {
-   public function index()
-   {
-       $menus = Menu::with('profile')->latest()->get();
-       return view('admin.profile_menus.index', compact('menus'));
-   }
+    public function index(Request $request)
+{
+    $query = Menu::with('profile')->latest();
+
+    // filter pencarian berdasarkan relasi profile.title
+    if ($request->filled('search')) {
+        $query->whereHas('profile', function ($q) use ($request) {
+            $q->where('title', 'like', '%' . $request->search . '%');
+        });
+    }
+
+    $menus = $query->paginate(10);
+
+    return view('admin.profile_menus.index', compact('menus'));
+}
+
 
    public function create()
 {

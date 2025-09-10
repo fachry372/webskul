@@ -9,11 +9,21 @@ use Illuminate\Support\Str;
 
 class GaleriController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $galeris = Galeri::latest()->get();
+        $query = Galeri::with('blocks')->latest();
+
+        // Filter pencarian (judul atau slug)
+        if ($request->filled('search')) {
+            $query->where('judul', 'like', '%' . $request->search . '%')
+                  ->orWhere('slug', 'like', '%' . $request->search . '%');
+        }
+
+        $galeris = $query->paginate(10);
+
         return view('admin.galeri.index', compact('galeris'));
     }
+
 
     public function create()
     {

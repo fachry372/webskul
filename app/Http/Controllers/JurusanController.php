@@ -7,9 +7,17 @@ use Illuminate\Http\Request;
 
 class JurusanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $jurusan = Jurusan::all();
+        $query = Jurusan::query()->latest();
+
+        // Filter pencarian
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $jurusan = $query->paginate(10);
+
         return view('admin.jurusan.index', compact('jurusan'));
     }
 

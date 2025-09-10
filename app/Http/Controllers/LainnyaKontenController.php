@@ -10,9 +10,21 @@ use Illuminate\Support\Facades\Storage;
 
 class LainnyaKontenController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $kontens = LainnyaKonten::with('lainnya')->latest()->get();
+        $query = LainnyaKonten::with('lainnya');
+
+        // Filter pencarian berdasarkan judul menu lainnya
+        if ($request->filled('search')) {
+            $query->whereHas('lainnya', function($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                  ->orWhere('slug', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Pagination (10 per halaman)
+        $kontens = $query->latest()->paginate(10);
+
         return view('admin.lainnya_konten.index', compact('kontens'));
     }
 
