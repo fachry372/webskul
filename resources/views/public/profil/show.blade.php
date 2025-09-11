@@ -156,19 +156,47 @@
                     </div>
                 @endif
 
-                {{-- Files --}}
-                @if(!empty($files) && is_array($files))
-                    <div class="mt-4 flex flex-wrap gap-2">
-                        @foreach($files as $file)
-                            @php
-                                $filePath = is_array($file) && isset($file['path']) ? $file['path'] : $file;
-                            @endphp
-                            <a href="{{ Storage::url($filePath) }}" class="download-btn" download>
-                                Download {{ pathinfo($filePath, PATHINFO_BASENAME) }}
-                            </a>
-                        @endforeach
-                    </div>
-                @endif
+{{-- Files Preview --}}
+@if(!empty($files) && is_array($files))
+<div class="mt-4 grid gap-6">
+    @foreach($files as $file)
+        @php
+            $filePath = is_array($file) && isset($file['path']) ? $file['path'] : $file;
+            $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+            $fileUrl = Storage::url($filePath);
+        @endphp
+
+        @if(in_array($extension, ['jpg','jpeg','png','gif','webp']))
+            {{-- Preview Gambar --}}
+            <img src="{{ $fileUrl }}" alt="File {{ $loop->iteration }}" class="gallery-image max-h-[800px]" loading="lazy">
+
+        @elseif($extension === 'pdf')
+            {{-- Preview PDF --}}
+            <iframe src="{{ $fileUrl }}" class="w-full h-[800px] border rounded" frameborder="0">
+                <p class="text-center py-4 text-red-600">Preview PDF tidak tersedia.
+                <a href="{{ $fileUrl }}" class="download-btn" target="_blank">Download PDF</a></p>
+            </iframe>
+
+        @elseif(in_array($extension, ['doc','docx','xls','xlsx','ppt','pptx']))
+            {{-- File Office: tampil info + tombol download --}}
+            <div class="border p-4 rounded bg-gray-100 text-center">
+                <p class="text-red-600 mb-2">Preview file Office tidak tersedia.</p>
+                <a href="{{ $fileUrl }}" class="download-btn" target="_blank">Download {{ pathinfo($filePath, PATHINFO_BASENAME) }}</a>
+            </div>
+
+        @else
+            {{-- File lain --}}
+            <div class="border p-4 rounded bg-gray-100 text-center">
+                <p class="text-red-600 mb-2">Preview file tidak tersedia untuk tipe ini.</p>
+                <a href="{{ $fileUrl }}" class="download-btn" target="_blank">Download {{ pathinfo($filePath, PATHINFO_BASENAME) }}</a>
+            </div>
+        @endif
+    @endforeach
+</div>
+@endif
+
+
+
             </div>
             <hr class="my-8 border-gray-300">
         @endif
@@ -184,3 +212,4 @@
     AOS.init({ duration: 800, once: true });
 </script>
 @endsection
+
