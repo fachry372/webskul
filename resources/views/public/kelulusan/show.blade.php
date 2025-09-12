@@ -257,34 +257,51 @@ iframe.file-viewer { width: 100%; height: 75vh; max-height: 600px; border: 1px s
 
 
             {{-- Files --}}
-            @if(!empty($block['files']) && is_array($block['files']))
-                <div class="mt-6 space-y-6">
-                    @foreach($block['files'] as $file)
-                        @if($file)
-                            @php
-                                $url = Storage::url($file);
-                                $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                            @endphp
-                            @if($ext==='pdf')
-                                <iframe src="{{ $url }}" class="file-viewer"></iframe>
-                                <a href="{{ $url }}" class="download-btn" download>Download PDF</a>
-                            @elseif(in_array($ext,['jpg','jpeg','png','gif','webp']))
-                                <img src="{{ $url }}" class="gallery-image">
-                                <a href="{{ $url }}" class="download-btn" download>Download Gambar</a>
-                            @elseif(in_array($ext,['mp4','webm']))
-                                <video src="{{ $url }}" controls class="w-full rounded-lg shadow"></video>
-                                <a href="{{ $url }}" class="download-btn" download>Download Video</a>
-                            @else
-                                <div class="fallback">
-                                    <p><strong>Pratinjau tidak tersedia.</strong></p>
-                                    <p>Silakan download file untuk membukanya.</p>
-                                </div>
-                                <a href="{{ $url }}" class="download-btn" target="_blank">Download File</a>
-                            @endif
-                        @endif
-                    @endforeach
-                </div>
-            @endif
+@if(!empty($block['files']) && is_array($block['files']))
+<div class="mt-6 grid gap-6">
+    @foreach($block['files'] as $file)
+        @php
+            $url = Storage::url($file);
+            $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        @endphp
+
+        {{-- Gambar --}}
+        @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
+            <img src="{{ $url }}" alt="Gambar {{ $loop->iteration }}"
+                 class="gallery-image max-h-[800px]" loading="lazy">
+
+        {{-- PDF pakai pdfjs --}}
+        @elseif($ext === 'pdf')
+            <div class="file-box">
+                <iframe
+                    src="{{ asset('pdfjs/web/viewer.html') }}?file={{ urlencode($url) }}"
+                    style="width:100%;height:80vh;border:none;">
+                </iframe>
+            </div>
+
+        {{-- Office (Word, Excel, PowerPoint) --}}
+        @elseif(in_array($ext, ['doc','docx','xls','xlsx','ppt','pptx']))
+            <div class="file-box">
+                <iframe
+                    src="https://view.officeapps.live.com/op/embed.aspx?src={{ urlencode($url) }}"
+                    style="width:100%;height:80vh;border:none;">
+                </iframe>
+            </div>
+
+        {{-- Lainnya --}}
+        @else
+            <div class="file-box text-center">
+                <p class="mb-2 text-gray-600">
+                    Preview tidak tersedia untuk tipe ini.
+                </p>
+                <a href="{{ $url }}" class="download-btn" target="_blank">
+                    Download {{ basename($file) }}
+                </a>
+            </div>
+        @endif
+    @endforeach
+</div>
+@endif
 
         </div>
         @if(isset($validBlocks[$index+1])) <hr class="my-6 border-gray-300"> @endif
