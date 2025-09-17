@@ -74,10 +74,11 @@
 
                     <!-- Tombol -->
                     <div class="mt-6">
-                        <a href="#"
+                        <a href="{{ route('profil.show', ['slug' => 'biodata-kepala-sekolah']) }}"
                             class="inline-block bg-green-500 hover:bg-green-600 text-white/90 text-lg font-semibold px-6 py-3 rounded shadow transition">
-                            Biodata Lengkap Kepala Sekolah
-                        </a>
+                             Biodata Lengkap Kepala Sekolah
+                         </a>
+
                     </div>
                 </div>
             </div>
