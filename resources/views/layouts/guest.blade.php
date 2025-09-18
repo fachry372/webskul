@@ -15,10 +15,17 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <style>
-            body {
-                background-color: rgb(45, 112, 236)
-                
-            }
+        body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: url('{{ asset('bg.jpg') }}') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Inter', sans-serif;
+}
+
+
             .login-container {
                 background: rgba(255, 255, 255, 0.95);
                 backdrop-filter: blur(10px);
